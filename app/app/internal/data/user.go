@@ -1187,7 +1187,7 @@ func (ub *UserBalanceRepo) DepositLastNew(ctx context.Context, userId int64, las
 	}
 
 	for _, vLocations := range locations {
-		res := ub.data.db.Table("location_new").
+		res := ub.data.DB(ctx).Table("location_new").
 			Where("id=?", vLocations.ID).
 			Updates(map[string]interface{}{"stop_location_again": "1"})
 		if 0 == res.RowsAffected || res.Error != nil {
