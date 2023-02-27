@@ -1442,6 +1442,27 @@ func (ub *UserBalanceRepo) UpdateWithdrawAmount(ctx context.Context, id int64, s
 	}, nil
 }
 
+// UpdateWithdrawPass .
+func (ub *UserBalanceRepo) UpdateWithdrawPass(ctx context.Context, id int64) (*biz.Withdraw, error) {
+	var withdraw Withdraw
+	withdraw.Status = "pass"
+	res := ub.data.DB(ctx).Table("withdraw").Where("id=?", id).Where("status=?", "rewarded").Updates(&withdraw)
+	if res.Error != nil {
+		return nil, errors.New(500, "CREATE_WITHDRAW_ERROR", "提现记录修改失败")
+	}
+
+	return &biz.Withdraw{
+		ID:              withdraw.ID,
+		UserId:          withdraw.UserId,
+		Amount:          withdraw.Amount,
+		RelAmount:       withdraw.RelAmount,
+		BalanceRecordId: withdraw.BalanceRecordId,
+		Status:          withdraw.Status,
+		Type:            withdraw.Type,
+		CreatedAt:       withdraw.CreatedAt,
+	}, nil
+}
+
 // GetWithdrawByUserId .
 func (ub *UserBalanceRepo) GetWithdrawByUserId(ctx context.Context, userId int64) ([]*biz.Withdraw, error) {
 	var withdraws []*Withdraw

@@ -115,6 +115,13 @@ service App {
 		};
 	};
 
+	rpc AdminWithdrawPass (AdminWithdrawPassRequest) returns (AdminWithdrawPassReply) {
+		option (google.api.http) = {
+			post: "/api/admin_dhb/withdraw_pass"
+			body: "send_body"
+		};
+	};
+
 	rpc AdminWithdrawEth (AdminWithdrawEthRequest) returns (AdminWithdrawEthReply) {
 		option (google.api.http) = {
 			get: "/api/admin_dhb/withdraw_eth"
@@ -526,6 +533,17 @@ message AdminWithdrawRequest {
 }
 
 message AdminWithdrawReply {
+}
+
+message AdminWithdrawPassRequest {
+	message SendBody{
+		int64 id = 1;
+	}
+
+	SendBody send_body = 1;
+}
+
+message AdminWithdrawPassReply {
 }
 
 message AdminWithdrawEthRequest {

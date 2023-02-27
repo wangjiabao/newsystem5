@@ -438,6 +438,10 @@ func (a *AppService) AdminWithdraw(ctx context.Context, req *v1.AdminWithdrawReq
 	return a.uuc.AdminWithdraw(ctx, req)
 }
 
+func (a *AppService) AdminWithdrawPass(ctx context.Context, req *v1.AdminWithdrawPassRequest) (*v1.AdminWithdrawPassReply, error) {
+	return a.uuc.AdminWithdrawPass(ctx, req)
+}
+
 func (a *AppService) CheckAdminUserArea(ctx context.Context, req *v1.CheckAdminUserAreaRequest) (*v1.CheckAdminUserAreaReply, error) {
 	return a.uuc.CheckAdminUserArea(ctx, req)
 }

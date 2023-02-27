@@ -38,6 +38,7 @@ type AppClient interface {
 	AdminLocationAllList(ctx context.Context, in *AdminLocationAllListRequest, opts ...grpc.CallOption) (*AdminLocationAllListReply, error)
 	AdminWithdrawList(ctx context.Context, in *AdminWithdrawListRequest, opts ...grpc.CallOption) (*AdminWithdrawListReply, error)
 	AdminWithdraw(ctx context.Context, in *AdminWithdrawRequest, opts ...grpc.CallOption) (*AdminWithdrawReply, error)
+	AdminWithdrawPass(ctx context.Context, in *AdminWithdrawPassRequest, opts ...grpc.CallOption) (*AdminWithdrawPassReply, error)
 	AdminWithdrawEth(ctx context.Context, in *AdminWithdrawEthRequest, opts ...grpc.CallOption) (*AdminWithdrawEthReply, error)
 	AdminFee(ctx context.Context, in *AdminFeeRequest, opts ...grpc.CallOption) (*AdminFeeReply, error)
 	AdminDailyLocationReward(ctx context.Context, in *AdminDailyLocationRewardRequest, opts ...grpc.CallOption) (*AdminDailyLocationRewardReply, error)
@@ -211,6 +212,15 @@ func (c *appClient) AdminWithdrawList(ctx context.Context, in *AdminWithdrawList
 func (c *appClient) AdminWithdraw(ctx context.Context, in *AdminWithdrawRequest, opts ...grpc.CallOption) (*AdminWithdrawReply, error) {
 	out := new(AdminWithdrawReply)
 	err := c.cc.Invoke(ctx, "/api.App/AdminWithdraw", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appClient) AdminWithdrawPass(ctx context.Context, in *AdminWithdrawPassRequest, opts ...grpc.CallOption) (*AdminWithdrawPassReply, error) {
+	out := new(AdminWithdrawPassReply)
+	err := c.cc.Invoke(ctx, "/api.App/AdminWithdrawPass", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -462,6 +472,7 @@ type AppServer interface {
 	AdminLocationAllList(context.Context, *AdminLocationAllListRequest) (*AdminLocationAllListReply, error)
 	AdminWithdrawList(context.Context, *AdminWithdrawListRequest) (*AdminWithdrawListReply, error)
 	AdminWithdraw(context.Context, *AdminWithdrawRequest) (*AdminWithdrawReply, error)
+	AdminWithdrawPass(context.Context, *AdminWithdrawPassRequest) (*AdminWithdrawPassReply, error)
 	AdminWithdrawEth(context.Context, *AdminWithdrawEthRequest) (*AdminWithdrawEthReply, error)
 	AdminFee(context.Context, *AdminFeeRequest) (*AdminFeeReply, error)
 	AdminDailyLocationReward(context.Context, *AdminDailyLocationRewardRequest) (*AdminDailyLocationRewardReply, error)
@@ -541,6 +552,9 @@ func (UnimplementedAppServer) AdminWithdrawList(context.Context, *AdminWithdrawL
 }
 func (UnimplementedAppServer) AdminWithdraw(context.Context, *AdminWithdrawRequest) (*AdminWithdrawReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AdminWithdraw not implemented")
+}
+func (UnimplementedAppServer) AdminWithdrawPass(context.Context, *AdminWithdrawPassRequest) (*AdminWithdrawPassReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AdminWithdrawPass not implemented")
 }
 func (UnimplementedAppServer) AdminWithdrawEth(context.Context, *AdminWithdrawEthRequest) (*AdminWithdrawEthReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AdminWithdrawEth not implemented")
@@ -914,6 +928,24 @@ func _App_AdminWithdraw_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AppServer).AdminWithdraw(ctx, req.(*AdminWithdrawRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _App_AdminWithdrawPass_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AdminWithdrawPassRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppServer).AdminWithdrawPass(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.App/AdminWithdrawPass",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppServer).AdminWithdrawPass(ctx, req.(*AdminWithdrawPassRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1438,6 +1470,10 @@ var App_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AdminWithdraw",
 			Handler:    _App_AdminWithdraw_Handler,
+		},
+		{
+			MethodName: "AdminWithdrawPass",
+			Handler:    _App_AdminWithdrawPass_Handler,
 		},
 		{
 			MethodName: "AdminWithdrawEth",

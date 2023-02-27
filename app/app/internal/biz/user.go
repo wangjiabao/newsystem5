@@ -191,6 +191,7 @@ type UserBalanceRepo interface {
 	GetUserRewardRecommendSort(ctx context.Context) ([]*UserSortRecommendReward, error)
 	UpdateBalance(ctx context.Context, userId int64, amount int64) (bool, error)
 
+	UpdateWithdrawPass(ctx context.Context, id int64) (*Withdraw, error)
 	UserDailyLocationReward(ctx context.Context, userId int64, amount int64, coinAmount int64, status string, locationId int64) (int64, error)
 	DepositLastNew(ctx context.Context, userId int64, lastAmount int64, lastCoinAmount int64, locations []*LocationNew) (int64, error)
 }
@@ -818,6 +819,21 @@ func (uuc *UserUseCase) AdminConfigUpdate(ctx context.Context, req *v1.AdminConf
 	res := &v1.AdminConfigUpdateReply{}
 
 	_, err = uuc.configRepo.UpdateConfig(ctx, req.SendBody.Id, req.SendBody.Value)
+	if nil != err {
+		return res, err
+	}
+
+	return res, nil
+}
+
+func (uuc *UserUseCase) AdminWithdrawPass(ctx context.Context, req *v1.AdminWithdrawPassRequest) (*v1.AdminWithdrawPassReply, error) {
+	var (
+		err error
+	)
+
+	res := &v1.AdminWithdrawPassReply{}
+
+	_, err = uuc.ubRepo.UpdateWithdrawPass(ctx, req.SendBody.Id)
 	if nil != err {
 		return res, err
 	}
