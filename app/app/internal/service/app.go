@@ -122,7 +122,7 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 
 	// 每次一共最多查2000条，所以注意好外层调用的定时查询的时间设置，当然都可以重新定义，
 	// 在功能上调用者查询两种币的交易记录，每次都要把数据覆盖查询，是一个较大范围的查找防止遗漏数据，范围最起码要大于实际这段时间的入单量，不能边界查询容易掉单，这样的实现是因为简单
-	for i := 1; i <= 2; i++ {
+	for i := 1; i <= 1; i++ {
 
 		//depositUsdtResult, err = requestEthDepositResult(200, int64(i), "0x55d398326f99059fF775485246999027B3197955")
 		depositUsdtResult, err = requestEthDepositResult(2, int64(i), "0x337610d27c682E347C9cD60BD4b3b107C9d34dDd")
@@ -163,7 +163,6 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 		// 统计开始
 		notExistDepositResult = make([]*biz.EthUserRecord, 0)
 		for _, vDepositUsdtResult := range depositUsdtResult { // 主查usdt
-			fmt.Println(vDepositUsdtResult)
 			if _, ok := existEthUserRecords[vDepositUsdtResult.Hash]; ok { // 记录已存在
 				continue
 			}
@@ -202,29 +201,31 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 
 			// 最少百位以上
 			lenValue := len(vDepositUsdtResult.Value)
-			if 18 > lenValue {
+			if 17 > lenValue {
 				continue
 			}
-			tmpValue, _ := strconv.ParseInt(vDepositUsdtResult.Value[0:lenValue-9], 10, 64)
+			// 去掉8个尾数0作为系统金额
+			tmpValue, _ := strconv.ParseInt(vDepositUsdtResult.Value[0:lenValue-8], 10, 64)
 			if 0 == tmpValue {
 				continue
 			}
-
+			fmt.Println(vDepositUsdtResult.Value, tmpValue)
 			tmpValue = tmpValue * 100 / 75 // 4个地址分，精度目前只识别到这里，如果有人
-			if int64(1000000000) > tmpValue {
+			fmt.Println(tmpValue)
+			if int64(100000000) > tmpValue { // 目前0.1表示
 				continue
 			}
 
 			notExistDepositResult = append(notExistDepositResult, &biz.EthUserRecord{ // 两种币的记录
-				UserId:   depositUsers[vDepositUsdtResult.From].ID,
-				Hash:     vDepositUsdtResult.Hash,
-				Status:   "success",
-				Type:     "deposit",
-				Amount:   strconv.FormatInt(tmpValue, 10) + "00000000",
-				CoinType: "USDT",
+				UserId:    depositUsers[vDepositUsdtResult.From].ID,
+				Hash:      vDepositUsdtResult.Hash,
+				Status:    "success",
+				Type:      "deposit",
+				Amount:    strconv.FormatInt(tmpValue, 10) + "00000000",
+				RelAmount: tmpValue * 1000,
+				CoinType:  "USDT",
 			})
 
-			fmt.Println(1, notExistDepositResult)
 			//&biz.EthUserRecord{
 			//	UserId:   depositUsers[vDepositUsdtResult.From].ID,
 			//	Hash:     tmpDhbHash,
@@ -235,10 +236,10 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 			//}
 		}
 
-		//_, err = a.ruc.EthUserRecordHandle(ctx, notExistDepositResult...)
-		//if nil != err {
-		//	fmt.Println(err)
-		//}
+		_, err = a.ruc.EthUserRecordHandle(ctx, notExistDepositResult...)
+		if nil != err {
+			fmt.Println(err)
+		}
 
 		//time.Sleep(2 * time.Second)
 	}

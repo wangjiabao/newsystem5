@@ -22,6 +22,19 @@ type Location struct {
 	CreatedAt    time.Time `gorm:"type:datetime;not null"`
 	UpdatedAt    time.Time `gorm:"type:datetime;not null"`
 }
+type LocationNew struct {
+	ID                int64     `gorm:"primarykey;type:int"`
+	UserId            int64     `gorm:"type:int;not null"`
+	Status            string    `gorm:"type:varchar(45);not null"`
+	Current           int64     `gorm:"type:bigint;not null"`
+	CurrentMax        int64     `gorm:"type:bigint;not null"`
+	StopLocationAgain int64     `gorm:"type:int;not null"`
+	OutRate           int64     `gorm:"type:int;not null"`
+	StopCoin          int64     `gorm:"type:bigint;not null"`
+	StopDate          time.Time `gorm:"type:datetime;not null"`
+	CreatedAt         time.Time `gorm:"type:datetime;not null"`
+	UpdatedAt         time.Time `gorm:"type:datetime;not null"`
+}
 
 type GlobalLock struct {
 	ID     int64 `gorm:"primarykey;type:int"`
@@ -64,6 +77,28 @@ func (lr *LocationRepo) CreateLocation(ctx context.Context, rel *biz.Location) (
 		CurrentMax:   location.CurrentMax,
 		Row:          location.Row,
 		Col:          location.Col,
+	}, nil
+}
+
+// CreateLocationNew .
+func (lr *LocationRepo) CreateLocationNew(ctx context.Context, rel *biz.LocationNew) (*biz.LocationNew, error) {
+	var location LocationNew
+	location.Status = rel.Status
+	location.Current = rel.Current
+	location.CurrentMax = rel.CurrentMax
+	location.UserId = rel.UserId
+	location.OutRate = rel.OutRate
+	res := lr.data.DB(ctx).Table("location_new").Create(&location)
+	if res.Error != nil {
+		return nil, errors.New(500, "CREATE_LOCATION_ERROR", "占位信息创建失败")
+	}
+
+	return &biz.LocationNew{
+		ID:         location.ID,
+		UserId:     location.UserId,
+		Status:     location.Status,
+		Current:    location.Current,
+		CurrentMax: location.CurrentMax,
 	}, nil
 }
 
@@ -160,7 +195,7 @@ func (lr *LocationRepo) GetMyLocationLast(ctx context.Context, userId int64) (*b
 // GetMyStopLocationLast .
 func (lr *LocationRepo) GetMyStopLocationLast(ctx context.Context, userId int64) (*biz.Location, error) {
 	var location Location
-	if err := lr.data.db.Table("location").
+	if err := lr.data.db.Table("location_new").
 		Where("status=?", "stop").
 		Where("user_id", userId).Order("id desc").First(&location).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -181,6 +216,39 @@ func (lr *LocationRepo) GetMyStopLocationLast(ctx context.Context, userId int64)
 		Col:          location.Col,
 		StopDate:     location.StopDate,
 	}, nil
+}
+
+// GetMyStopLocationsLast .
+func (lr *LocationRepo) GetMyStopLocationsLast(ctx context.Context, userId int64) ([]*biz.LocationNew, error) {
+
+	var locations []*LocationNew
+	res := make([]*biz.LocationNew, 0)
+	if err := lr.data.db.Table("location_new").
+		Where("user_id", userId).
+		Where("status=?", "stop").
+		Where("stop_location_again", 0).
+		Order("id desc").Find(&locations).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, errors.NotFound("LOCATION_NOT_FOUND", "location not found")
+		}
+
+		return nil, errors.New(500, "LOCATION ERROR", err.Error())
+	}
+
+	for _, location := range locations {
+		res = append(res, &biz.LocationNew{
+			ID:                location.ID,
+			UserId:            location.UserId,
+			Status:            location.Status,
+			Current:           location.Current,
+			CurrentMax:        location.CurrentMax,
+			StopDate:          location.StopDate,
+			StopLocationAgain: location.StopLocationAgain,
+			StopCoin:          location.StopCoin,
+		})
+	}
+
+	return res, nil
 }
 
 // GetMyLocationRunningLast .
@@ -291,6 +359,34 @@ func (lr *LocationRepo) GetLocationsByUserId(ctx context.Context, userId int64) 
 			CurrentMax:   location.CurrentMax,
 			Row:          location.Row,
 			Col:          location.Col,
+		})
+	}
+
+	return res, nil
+}
+
+// GetLocationsNewByUserId .
+func (lr *LocationRepo) GetLocationsNewByUserId(ctx context.Context, userId int64) ([]*biz.LocationNew, error) {
+	var locations []*LocationNew
+	res := make([]*biz.LocationNew, 0)
+	if err := lr.data.db.Table("location_new").
+		Where("user_id=?", userId).
+		Order("id desc").Find(&locations).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, errors.NotFound("LOCATION_NOT_FOUND", "location not found")
+		}
+
+		return nil, errors.New(500, "LOCATION ERROR", err.Error())
+	}
+
+	for _, location := range locations {
+		res = append(res, &biz.LocationNew{
+			ID:         location.ID,
+			UserId:     location.UserId,
+			Status:     location.Status,
+			Current:    location.Current,
+			CurrentMax: location.CurrentMax,
+			OutRate:    location.OutRate,
 		})
 	}
 
@@ -408,6 +504,29 @@ func (lr *LocationRepo) UpdateLocation(ctx context.Context, id int64, status str
 		}
 	} else {
 		res := lr.data.db.Table("location").
+			Where("id=?", id).
+			Where("status=?", "running").
+			Updates(map[string]interface{}{"current": gorm.Expr("current + ?", current), "status": status})
+		if 0 == res.RowsAffected || res.Error != nil {
+			return res.Error
+		}
+	}
+
+	return nil
+}
+
+// UpdateLocationNew .
+func (lr *LocationRepo) UpdateLocationNew(ctx context.Context, id int64, status string, current int64, stopDate time.Time, stopCoin int64) error {
+
+	if "stop" == status {
+		res := lr.data.DB(ctx).Table("location_new").
+			Where("id=?", id).
+			Updates(map[string]interface{}{"current": gorm.Expr("current + ?", current), "status": "stop", "stop_date": stopDate, "stop_coin": stopCoin})
+		if 0 == res.RowsAffected || res.Error != nil {
+			return res.Error
+		}
+	} else {
+		res := lr.data.DB(ctx).Table("location_new").
 			Where("id=?", id).
 			Where("status=?", "running").
 			Updates(map[string]interface{}{"current": gorm.Expr("current + ?", current), "status": status})

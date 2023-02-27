@@ -159,7 +159,7 @@ type UserBalanceRepo interface {
 	UserDailyRecommendArea(ctx context.Context, userId int64, amount int64, status string) (int64, error)
 	RecommendWithdrawReward(ctx context.Context, userId int64, amount int64, locationId int64, status string) (int64, error)
 	RecommendWithdrawTopReward(ctx context.Context, userId int64, amount int64, locationId int64, vip int64, status string) (int64, error)
-	NormalRecommendReward(ctx context.Context, userId int64, amount int64, locationId int64, status string) (int64, error)
+	NormalRecommendReward(ctx context.Context, userId int64, amount int64, amountDhb int64, locationId int64, status string) (int64, error)
 	NormalRecommendTopReward(ctx context.Context, userId int64, amount int64, locationId int64, reasonId int64, status string) (int64, error)
 	NormalWithdrawRecommendReward(ctx context.Context, userId int64, amount int64, locationId int64, status string) (int64, error)
 	NormalWithdrawRecommendTopReward(ctx context.Context, userId int64, amount int64, locationId int64, reasonId int64, status string) (int64, error)
@@ -191,6 +191,8 @@ type UserBalanceRepo interface {
 	UpdateWithdrawAmount(ctx context.Context, id int64, status string, amount int64) (*Withdraw, error)
 	GetUserRewardRecommendSort(ctx context.Context) ([]*UserSortRecommendReward, error)
 	UpdateBalance(ctx context.Context, userId int64, amount int64) (bool, error)
+
+	DepositLastNew(ctx context.Context, userId int64, lastAmount int64, lastCoinAmount int64, locations []*LocationNew) (int64, error)
 }
 
 type UserRecommendRepo interface {
