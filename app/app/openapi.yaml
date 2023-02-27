@@ -1,0 +1,1438 @@
+# Generated with protoc-gen-openapi
+# https://github.com/google/gnostic/tree/master/cmd/protoc-gen-openapi
+
+openapi: 3.0.3
+info:
+    title: App API
+    version: 0.0.1
+paths:
+    /api/admin_dhb/admin_list:
+        get:
+            tags:
+                - App
+            operationId: App_AdminList
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AdminListReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/admin_dhb/all:
+        get:
+            tags:
+                - App
+            operationId: App_AdminAll
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AdminAllReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/admin_dhb/auth_create:
+        post:
+            tags:
+                - App
+            operationId: App_AuthAdminCreate
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/AuthAdminCreateRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AuthAdminCreateReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/admin_dhb/auth_delete:
+        post:
+            tags:
+                - App
+            operationId: App_AuthAdminDelete
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/AuthAdminDeleteRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AuthAdminDeleteReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/admin_dhb/auth_list:
+        get:
+            tags:
+                - App
+            operationId: App_AuthList
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AuthListReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/admin_dhb/balance_update:
+        post:
+            tags:
+                - App
+            operationId: App_AdminBalanceUpdate
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/AdminBalanceUpdateRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AdminBalanceUpdateReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/admin_dhb/change_password:
+        post:
+            tags:
+                - App
+            operationId: App_AdminChangePassword
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/AdminChangePasswordRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AdminChangePasswordReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/admin_dhb/check_and_insert_recommend_area:
+        get:
+            tags:
+                - App
+            operationId: App_CheckAndInsertRecommendArea
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CheckAndInsertRecommendAreaReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/admin_dhb/config:
+        get:
+            tags:
+                - App
+            operationId: App_AdminConfig
+            parameters:
+                - name: userId
+                  in: query
+                  schema:
+                    type: integer
+                    format: int64
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AdminConfigReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/admin_dhb/config_update:
+        post:
+            tags:
+                - App
+            operationId: App_AdminConfigUpdate
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/AdminConfigUpdateRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AdminConfigUpdateReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/admin_dhb/create_account:
+        post:
+            tags:
+                - App
+            operationId: App_AdminCreateAccount
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/AdminCreateAccountRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AdminCreateAccountReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/admin_dhb/daily_fee:
+        get:
+            tags:
+                - App
+            operationId: App_AdminDailyFee
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AdminDailyFeeReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/admin_dhb/daily_recommend_reward:
+        get:
+            tags:
+                - App
+            operationId: App_AdminDailyRecommendReward
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AdminDailyRecommendRewardReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/admin_dhb/deposit:
+        get:
+            tags:
+                - App
+            operationId: App_Deposit
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/DepositReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/admin_dhb/fee:
+        get:
+            tags:
+                - App
+            operationId: App_AdminFee
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AdminFeeReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/admin_dhb/location_all_list:
+        get:
+            tags:
+                - App
+            operationId: App_AdminLocationAllList
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int64
+                - name: address
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AdminLocationAllListReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/admin_dhb/location_insert:
+        post:
+            tags:
+                - App
+            operationId: App_AdminLocationInsert
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/AdminLocationInsertRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AdminLocationInsertReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/admin_dhb/location_list:
+        get:
+            tags:
+                - App
+            operationId: App_AdminLocationList
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int64
+                - name: address
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AdminLocationListReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/admin_dhb/login:
+        post:
+            tags:
+                - App
+            operationId: App_AdminLogin
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/AdminLoginRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AdminLoginReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/admin_dhb/month_recommend:
+        get:
+            tags:
+                - App
+            operationId: App_AdminMonthRecommend
+            parameters:
+                - name: address
+                  in: query
+                  schema:
+                    type: string
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AdminMonthRecommendReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/admin_dhb/my_auth_list:
+        get:
+            tags:
+                - App
+            operationId: App_MyAuthList
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/MyAuthListReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/admin_dhb/reward_list:
+        get:
+            tags:
+                - App
+            operationId: App_AdminRewardList
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int64
+                - name: address
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AdminRewardListReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/admin_dhb/user_auth_list:
+        get:
+            tags:
+                - App
+            operationId: App_UserAuthList
+            parameters:
+                - name: adminId
+                  in: query
+                  schema:
+                    type: integer
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UserAuthListReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/admin_dhb/user_list:
+        get:
+            tags:
+                - App
+            operationId: App_AdminUserList
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int64
+                - name: address
+                  in: query
+                  schema:
+                    type: string
+                - name: isLocation
+                  in: query
+                  schema:
+                    type: boolean
+                - name: vip
+                  in: query
+                  schema:
+                    type: integer
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AdminUserListReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/admin_dhb/user_recommend:
+        get:
+            tags:
+                - App
+            operationId: App_AdminUserRecommend
+            parameters:
+                - name: userId
+                  in: query
+                  schema:
+                    type: integer
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AdminUserRecommendReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/admin_dhb/vip_update:
+        post:
+            tags:
+                - App
+            operationId: App_AdminVipUpdate
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/AdminVipUpdateRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AdminVipUpdateReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/admin_dhb/withdraw:
+        get:
+            tags:
+                - App
+            operationId: App_AdminWithdraw
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AdminWithdrawReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/admin_dhb/withdraw_eth:
+        get:
+            tags:
+                - App
+            operationId: App_AdminWithdrawEth
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AdminWithdrawEthReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/admin_dhb/withdraw_list:
+        get:
+            tags:
+                - App
+            operationId: App_AdminWithdrawList
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int64
+                - name: address
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AdminWithdrawListReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/app_server/fee_reward_list:
+        get:
+            tags:
+                - App
+            operationId: App_FeeRewardList
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/FeeRewardListReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/app_server/recommend_list:
+        get:
+            tags:
+                - App
+            operationId: App_RecommendList
+            parameters:
+                - name: type
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/RecommendListReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/app_server/recommend_reward_list:
+        get:
+            tags:
+                - App
+            operationId: App_RecommendRewardList
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/RecommendRewardListReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/app_server/reward_list:
+        get:
+            tags:
+                - App
+            operationId: App_RewardList
+            parameters:
+                - name: type
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/RewardListReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/app_server/user_info:
+        get:
+            tags:
+                - App
+            operationId: App_UserInfo
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UserInfoReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/app_server/withdraw:
+        post:
+            tags:
+                - App
+            operationId: App_Withdraw
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/WithdrawRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/WithdrawReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/app_server/withdraw_list:
+        get:
+            tags:
+                - App
+            operationId: App_WithdrawList
+            parameters:
+                - name: type
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/WithdrawListReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+components:
+    schemas:
+        AdminAllReply:
+            type: object
+            properties:
+                todayTotalUser:
+                    type: integer
+                    format: int64
+                locationCount:
+                    type: integer
+                    format: int64
+                totalUser:
+                    type: integer
+                    format: int64
+                allBalance:
+                    type: string
+                todayLocation:
+                    type: string
+                allLocation:
+                    type: string
+                todayWithdraw:
+                    type: string
+                allWithdraw:
+                    type: string
+                allReward:
+                    type: string
+                allSystemRewardAndFee:
+                    type: string
+        AdminBalanceUpdateReply:
+            type: object
+            properties: {}
+        AdminBalanceUpdateRequest_SendBody:
+            type: object
+            properties:
+                userId:
+                    type: integer
+                    format: int64
+                amount:
+                    type: string
+        AdminChangePasswordReply:
+            type: object
+            properties: {}
+        AdminChangePasswordRequest_SendBody:
+            type: object
+            properties:
+                account:
+                    type: string
+                password:
+                    type: string
+        AdminConfigReply:
+            type: object
+            properties:
+                config:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/AdminConfigReply_List'
+                count:
+                    type: integer
+                    format: int64
+        AdminConfigReply_List:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: int64
+                name:
+                    type: string
+                value:
+                    type: string
+        AdminConfigUpdateReply:
+            type: object
+            properties: {}
+        AdminConfigUpdateRequest_SendBody:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: int64
+                value:
+                    type: string
+        AdminCreateAccountReply:
+            type: object
+            properties: {}
+        AdminCreateAccountRequest_SendBody:
+            type: object
+            properties:
+                account:
+                    type: string
+                password:
+                    type: string
+        AdminDailyFeeReply:
+            type: object
+            properties: {}
+        AdminDailyRecommendRewardReply:
+            type: object
+            properties: {}
+        AdminFeeReply:
+            type: object
+            properties: {}
+        AdminListReply:
+            type: object
+            properties:
+                account:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/AdminListReply_List'
+        AdminListReply_List:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: int64
+                account:
+                    type: string
+        AdminLocationAllListReply:
+            type: object
+            properties:
+                locations:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/AdminLocationAllListReply_LocationList'
+                count:
+                    type: integer
+                    format: int64
+        AdminLocationAllListReply_LocationList:
+            type: object
+            properties:
+                createdAt:
+                    type: string
+                address:
+                    type: string
+                row:
+                    type: integer
+                    format: int64
+                col:
+                    type: integer
+                    format: int64
+                status:
+                    type: string
+                currentLevel:
+                    type: integer
+                    format: int64
+                current:
+                    type: string
+                currentMax:
+                    type: string
+        AdminLocationInsertReply:
+            type: object
+            properties: {}
+        AdminLocationInsertRequest_SendBody:
+            type: object
+            properties:
+                userId:
+                    type: integer
+                    format: int64
+                amount:
+                    type: integer
+                    format: int64
+        AdminLocationListReply:
+            type: object
+            properties:
+                locations:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/AdminLocationListReply_LocationList'
+                count:
+                    type: integer
+                    format: int64
+        AdminLocationListReply_LocationList:
+            type: object
+            properties:
+                createdAt:
+                    type: string
+                address:
+                    type: string
+                row:
+                    type: integer
+                    format: int64
+                col:
+                    type: integer
+                    format: int64
+                status:
+                    type: string
+                currentLevel:
+                    type: integer
+                    format: int64
+                current:
+                    type: string
+                currentMax:
+                    type: string
+        AdminLoginReply:
+            type: object
+            properties:
+                token:
+                    type: string
+        AdminLoginRequest_SendBody:
+            type: object
+            properties:
+                account:
+                    type: string
+                password:
+                    type: string
+        AdminMonthRecommendReply:
+            type: object
+            properties:
+                users:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/AdminMonthRecommendReply_List'
+                count:
+                    type: integer
+                    format: int64
+        AdminMonthRecommendReply_List:
+            type: object
+            properties:
+                address:
+                    type: string
+                recommendAddress:
+                    type: string
+                id:
+                    type: integer
+                    format: int64
+                createdAt:
+                    type: string
+        AdminRewardListReply:
+            type: object
+            properties:
+                rewards:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/AdminRewardListReply_List'
+                count:
+                    type: integer
+                    format: int64
+        AdminRewardListReply_List:
+            type: object
+            properties:
+                createdAt:
+                    type: string
+                amount:
+                    type: string
+                type:
+                    type: string
+                address:
+                    type: string
+                reason:
+                    type: string
+        AdminUserListReply:
+            type: object
+            properties:
+                users:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/AdminUserListReply_UserList'
+                count:
+                    type: integer
+                    format: int64
+        AdminUserListReply_UserList:
+            type: object
+            properties:
+                userId:
+                    type: integer
+                    format: int64
+                createdAt:
+                    type: string
+                address:
+                    type: string
+                balanceUsdt:
+                    type: string
+                balanceDhb:
+                    type: string
+                vip:
+                    type: integer
+                    format: int64
+                monthRecommend:
+                    type: integer
+                    format: int64
+                historyRecommend:
+                    type: integer
+                    format: int64
+        AdminUserRecommendReply:
+            type: object
+            properties:
+                users:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/AdminUserRecommendReply_List'
+        AdminUserRecommendReply_List:
+            type: object
+            properties:
+                userId:
+                    type: integer
+                    format: int64
+                address:
+                    type: string
+                id:
+                    type: integer
+                    format: int64
+                createdAt:
+                    type: string
+        AdminVipUpdateReply:
+            type: object
+            properties: {}
+        AdminVipUpdateRequest_SendBody:
+            type: object
+            properties:
+                userId:
+                    type: integer
+                    format: int64
+                vip:
+                    type: integer
+                    format: int64
+        AdminWithdrawEthReply:
+            type: object
+            properties: {}
+        AdminWithdrawListReply:
+            type: object
+            properties:
+                withdraw:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/AdminWithdrawListReply_List'
+                count:
+                    type: integer
+                    format: int64
+        AdminWithdrawListReply_List:
+            type: object
+            properties:
+                address:
+                    type: string
+                id:
+                    type: integer
+                    format: int64
+                createdAt:
+                    type: string
+                amount:
+                    type: string
+                relAmount:
+                    type: string
+                type:
+                    type: string
+                status:
+                    type: string
+        AdminWithdrawReply:
+            type: object
+            properties: {}
+        AuthAdminCreateReply:
+            type: object
+            properties: {}
+        AuthAdminCreateRequest_SendBody:
+            type: object
+            properties:
+                adminId:
+                    type: integer
+                    format: int64
+                authId:
+                    type: integer
+                    format: int64
+        AuthAdminDeleteReply:
+            type: object
+            properties: {}
+        AuthAdminDeleteRequest_SendBody:
+            type: object
+            properties:
+                adminId:
+                    type: integer
+                    format: int64
+                authId:
+                    type: integer
+                    format: int64
+        AuthListReply:
+            type: object
+            properties:
+                auth:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/AuthListReply_List'
+        AuthListReply_List:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: int64
+                name:
+                    type: string
+                path:
+                    type: string
+        CheckAndInsertRecommendAreaReply:
+            type: object
+            properties: {}
+        DepositReply:
+            type: object
+            properties: {}
+        FeeRewardListReply:
+            type: object
+            properties:
+                rewards:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/FeeRewardListReply_List'
+        FeeRewardListReply_List:
+            type: object
+            properties:
+                createdAt:
+                    type: string
+                amount:
+                    type: string
+        GoogleProtobufAny:
+            type: object
+            properties:
+                '@type':
+                    type: string
+                    description: The type of the serialized message.
+            additionalProperties: true
+            description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
+        MyAuthListReply:
+            type: object
+            properties:
+                auth:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/MyAuthListReply_List'
+                super:
+                    type: integer
+                    format: int64
+        MyAuthListReply_List:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: int64
+                name:
+                    type: string
+                path:
+                    type: string
+        RecommendListReply:
+            type: object
+            properties:
+                recommends:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/RecommendListReply_List'
+        RecommendListReply_List:
+            type: object
+            properties:
+                amount:
+                    type: string
+                status:
+                    type: string
+        RecommendRewardListReply:
+            type: object
+            properties:
+                rewards:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/RecommendRewardListReply_List'
+        RecommendRewardListReply_List:
+            type: object
+            properties:
+                createdAt:
+                    type: string
+                amount:
+                    type: string
+                type:
+                    type: string
+                reason:
+                    type: string
+        RewardListReply:
+            type: object
+            properties:
+                rewards:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/RewardListReply_List'
+        RewardListReply_List:
+            type: object
+            properties:
+                createdAt:
+                    type: string
+                amount:
+                    type: string
+                locationStatus:
+                    type: string
+                type:
+                    type: string
+        Status:
+            type: object
+            properties:
+                code:
+                    type: integer
+                    description: The status code, which should be an enum value of [google.rpc.Code][google.rpc.Code].
+                    format: int32
+                message:
+                    type: string
+                    description: A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the [google.rpc.Status.details][google.rpc.Status.details] field, or localized by the client.
+                details:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GoogleProtobufAny'
+                    description: A list of messages that carry the error details.  There is a common set of message types for APIs to use.
+            description: 'The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).'
+        UserAuthListReply:
+            type: object
+            properties:
+                auth:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/UserAuthListReply_List'
+        UserAuthListReply_List:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: int64
+                name:
+                    type: string
+                path:
+                    type: string
+        UserInfoReply:
+            type: object
+            properties:
+                address:
+                    type: string
+                level:
+                    type: integer
+                    format: int64
+                status:
+                    type: string
+                amount:
+                    type: string
+                balanceUsdt:
+                    type: string
+                balanceDhb:
+                    type: string
+                inviteUrl:
+                    type: string
+                inviteUserAddress:
+                    type: string
+                recommendNum:
+                    type: integer
+                    format: int64
+                recommendTeamNum:
+                    type: integer
+                    format: int64
+                total:
+                    type: string
+                feeTotal:
+                    type: string
+                row:
+                    type: integer
+                    format: int64
+                col:
+                    type: integer
+                    format: int64
+                currentMonthRecommendNum:
+                    type: integer
+                    format: int64
+                recommendTotal:
+                    type: string
+                locationTotal:
+                    type: string
+                level1Dhb:
+                    type: string
+                level2Dhb:
+                    type: string
+                level3Dhb:
+                    type: string
+                usdt:
+                    type: string
+                dhb:
+                    type: string
+                account:
+                    type: string
+                recommendNumAll:
+                    type: integer
+                    format: int64
+                recommendTeamAll:
+                    type: integer
+                    format: int64
+                amountB:
+                    type: string
+                userCount:
+                    type: string
+        WithdrawListReply:
+            type: object
+            properties:
+                withdraw:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/WithdrawListReply_List'
+        WithdrawListReply_List:
+            type: object
+            properties:
+                createdAt:
+                    type: string
+                amount:
+                    type: string
+                type:
+                    type: string
+                status:
+                    type: string
+        WithdrawReply:
+            type: object
+            properties:
+                status:
+                    type: string
+        WithdrawRequest_SendBody:
+            type: object
+            properties:
+                type:
+                    type: string
+                amount:
+                    type: string
+tags:
+    - name: App
