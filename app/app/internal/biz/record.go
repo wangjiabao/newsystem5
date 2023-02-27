@@ -210,12 +210,19 @@ func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord
 		}
 
 		if err = ruc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+			tmpLocationStatus := "running"
+			var tmpStopDate time.Time
+			if locationCurrent >= locationCurrentMax {
+				tmpLocationStatus = "stop"
+				tmpStopDate = time.Now().UTC().Add(8 * time.Hour)
+			}
 			currentLocationNew, err = ruc.locationRepo.CreateLocationNew(ctx, &LocationNew{ // 占位
 				UserId:     v.UserId,
-				Status:     "running",
+				Status:     tmpLocationStatus,
 				Current:    locationCurrent,
 				CurrentMax: locationCurrentMax,
 				OutRate:    outRate,
+				StopDate:   tmpStopDate,
 			})
 			if nil != err {
 				return err
@@ -272,14 +279,14 @@ func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord
 			}
 
 			// 修改用户推荐人区数据，修改自身区数据
-			_, err = ruc.userRecommendRepo.UpdateUserAreaSelfAmount(ctx, v.UserId, currentValue/10000000000)
+			_, err = ruc.userRecommendRepo.UpdateUserAreaSelfAmount(ctx, v.UserId, currentValue/100000)
 			if nil != err {
 				return err
 			}
 			for _, vTmpRecommendUserIds := range tmpRecommendUserIds {
 				vTmpRecommendUserId, _ := strconv.ParseInt(vTmpRecommendUserIds, 10, 64)
 				if vTmpRecommendUserId > 0 {
-					_, err = ruc.userRecommendRepo.UpdateUserAreaAmount(ctx, vTmpRecommendUserId, currentValue/10000000000)
+					_, err = ruc.userRecommendRepo.UpdateUserAreaAmount(ctx, vTmpRecommendUserId, currentValue/100000)
 					if nil != err {
 						return err
 					}

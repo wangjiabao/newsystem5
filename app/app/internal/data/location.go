@@ -88,6 +88,7 @@ func (lr *LocationRepo) CreateLocationNew(ctx context.Context, rel *biz.Location
 	location.CurrentMax = rel.CurrentMax
 	location.UserId = rel.UserId
 	location.OutRate = rel.OutRate
+	location.StopDate = rel.StopDate
 	res := lr.data.DB(ctx).Table("location_new").Create(&location)
 	if res.Error != nil {
 		return nil, errors.New(500, "CREATE_LOCATION_ERROR", "占位信息创建失败")

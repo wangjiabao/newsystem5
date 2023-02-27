@@ -209,9 +209,9 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 			if 0 == tmpValue {
 				continue
 			}
-			fmt.Println(vDepositUsdtResult.Value, tmpValue)
+			//fmt.Println(vDepositUsdtResult.Value, tmpValue)
 			tmpValue = tmpValue * 100 / 75 // 4个地址分，精度目前只识别到这里，如果有人
-			fmt.Println(tmpValue)
+			//fmt.Println(tmpValue)
 			if int64(100000000) > tmpValue { // 目前0.1表示
 				continue
 			}
