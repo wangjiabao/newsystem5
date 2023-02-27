@@ -457,8 +457,8 @@ message AdminUserListReply {
 		int64 vip = 5;
 		int64 monthRecommend = 7;
 		int64 historyRecommend = 6;
-		int64 areaAmount = 9;
-		int64 areaMaxAmount = 10;
+		string areaAmount = 9;
+		string areaMaxAmount = 10;
 	}
 	int64 count = 2;
 }

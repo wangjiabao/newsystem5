@@ -72,7 +72,7 @@ type EthUserRecordRepo interface {
 type LocationRepo interface {
 	CreateLocation(ctx context.Context, rel *Location) (*Location, error)
 	GetLocationLast(ctx context.Context) (*Location, error)
-	GetMyLocationLast(ctx context.Context, userId int64) (*Location, error)
+	GetMyLocationLast(ctx context.Context, userId int64) (*LocationNew, error)
 	GetLocationDailyYesterday(ctx context.Context, day int) ([]*LocationNew, error)
 	GetMyStopLocationLast(ctx context.Context, userId int64) (*Location, error)
 	GetMyLocationRunningLast(ctx context.Context, userId int64) (*Location, error)
@@ -90,7 +90,7 @@ type LocationRepo interface {
 	UnLockGlobalWithdraw(ctx context.Context) (bool, error)
 	GetLockGlobalLocation(ctx context.Context) (*GlobalLock, error)
 	GetLocationUserCount(ctx context.Context) int64
-	GetLocationByIds(ctx context.Context, userIds ...int64) ([]*Location, error)
+	GetLocationByIds(ctx context.Context, userIds ...int64) ([]*LocationNew, error)
 	GetAllLocations(ctx context.Context) ([]*Location, error)
 	GetLocationsByUserIds(ctx context.Context, userIds []int64) ([]*Location, error)
 
@@ -280,14 +280,14 @@ func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord
 			}
 
 			// 修改用户推荐人区数据，修改自身区数据
-			_, err = ruc.userRecommendRepo.UpdateUserAreaSelfAmount(ctx, v.UserId, currentValue/100000)
+			_, err = ruc.userRecommendRepo.UpdateUserAreaSelfAmount(ctx, v.UserId, currentValue/10000000000000)
 			if nil != err {
 				return err
 			}
 			for _, vTmpRecommendUserIds := range tmpRecommendUserIds {
 				vTmpRecommendUserId, _ := strconv.ParseInt(vTmpRecommendUserIds, 10, 64)
 				if vTmpRecommendUserId > 0 {
-					_, err = ruc.userRecommendRepo.UpdateUserAreaAmount(ctx, vTmpRecommendUserId, currentValue/100000)
+					_, err = ruc.userRecommendRepo.UpdateUserAreaAmount(ctx, vTmpRecommendUserId, currentValue/10000000000000)
 					if nil != err {
 						return err
 					}

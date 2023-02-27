@@ -155,7 +155,7 @@ type UserBalanceRepo interface {
 	SystemFee(ctx context.Context, amount int64, locationId int64) error
 	UserFee(ctx context.Context, userId int64, amount int64) (int64, error)
 	UserDailyFee(ctx context.Context, userId int64, amount int64, status string) (int64, error)
-	UserDailyRecommendArea(ctx context.Context, userId int64, amount int64, status string) (int64, error)
+	UserDailyRecommendArea(ctx context.Context, userId int64, amount int64, amountDhb int64, status string) (int64, error)
 	RecommendWithdrawReward(ctx context.Context, userId int64, amount int64, locationId int64, status string) (int64, error)
 	RecommendWithdrawTopReward(ctx context.Context, userId int64, amount int64, locationId int64, vip int64, status string) (int64, error)
 	NormalRecommendReward(ctx context.Context, userId int64, amount int64, amountDhb int64, locationId int64, status string) (int64, error)
@@ -485,8 +485,8 @@ func (uuc *UserUseCase) AdminUserList(ctx context.Context, req *v1.AdminUserList
 			BalanceDhb:       fmt.Sprintf("%.2f", float64(userBalances[v.ID].BalanceDhb)/float64(10000000000)),
 			Vip:              userInfos[v.ID].Vip,
 			MonthRecommend:   tmpCount,
-			AreaAmount:       areaAmount,
-			AreaMaxAmount:    maxAreaAmount,
+			AreaAmount:       fmt.Sprintf("%.2f", float64(areaAmount)/float64(100000)),
+			AreaMaxAmount:    fmt.Sprintf("%.2f", float64(maxAreaAmount)/float64(100000)),
 			HistoryRecommend: userInfos[v.ID].HistoryRecommend,
 		})
 	}
@@ -1518,6 +1518,9 @@ func (uuc *UserUseCase) AdminDailyRecommendReward(ctx context.Context, req *v1.A
 		recommendAreaFour      int64
 		recommendAreaFourRate  int64
 		fee                    int64
+		rewardRate             int64
+		coinPrice              int64
+		coinRewardRate         int64
 		day                    = -1
 		err                    error
 	)
@@ -1540,7 +1543,7 @@ func (uuc *UserUseCase) AdminDailyRecommendReward(ctx context.Context, req *v1.A
 
 	configs, _ = uuc.configRepo.GetConfigByKeys(ctx, "recommend_area_one",
 		"recommend_area_one_rate", "recommend_area_two_rate", "recommend_area_three_rate", "recommend_area_four_rate",
-		"recommend_area_two", "recommend_area_three", "recommend_area_four")
+		"recommend_area_two", "recommend_area_three", "recommend_area_four", "coin_price", "coin_reward_rate", "reward_rate")
 	if nil != configs {
 		for _, vConfig := range configs {
 			if "recommend_area_one" == vConfig.KeyName {
@@ -1559,6 +1562,12 @@ func (uuc *UserUseCase) AdminDailyRecommendReward(ctx context.Context, req *v1.A
 				recommendAreaFour, _ = strconv.ParseInt(vConfig.Value, 10, 64)
 			} else if "recommend_area_four_rate" == vConfig.KeyName {
 				recommendAreaFourRate, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "coin_price" == vConfig.KeyName {
+				coinPrice, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "coin_reward_rate" == vConfig.KeyName {
+				coinRewardRate, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "reward_rate" == vConfig.KeyName {
+				rewardRate, _ = strconv.ParseInt(vConfig.Value, 10, 64)
 			}
 		}
 	}
@@ -1637,41 +1646,43 @@ func (uuc *UserUseCase) AdminDailyRecommendReward(ctx context.Context, req *v1.A
 		}
 
 		// 比较级别
-		if areaAmount >= recommendAreaOne {
+		if areaAmount >= recommendAreaOne*100000 {
 			level1[user.ID] = user.ID
 		}
 
-		if areaAmount >= recommendAreaTwo {
+		if areaAmount >= recommendAreaTwo*100000 {
 			level2[user.ID] = user.ID
 		}
 
-		if areaAmount >= recommendAreaThree {
+		if areaAmount >= recommendAreaThree*100000 {
 			level3[user.ID] = user.ID
 		}
 
-		if areaAmount >= recommendAreaFour {
+		if areaAmount >= recommendAreaFour*100000 {
 			level4[user.ID] = user.ID
 		}
 	}
 	fmt.Println(level4, level3, level2, level1)
 	// 分红
-	fee /= 100000
+	fee /= 100000 // 这里多除五个0
 	fmt.Println(fee)
 	if 0 < len(level1) {
 		feeLevel1 := fee * recommendAreaOneRate / 100 / int64(len(level1))
 		feeLevel1 *= 100000
+
 		for _, vLevel1 := range level1 {
 			if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-				var myLocationLast *Location
+				var myLocationLast *LocationNew
 				// 获取当前用户的占位信息，已经有运行中的跳过
 				myLocationLast, err = uuc.locationRepo.GetMyLocationLast(ctx, vLevel1)
 				if nil == myLocationLast { // 无占位信息
 					return err
 				}
-				tmpCurrentStatus := myLocationLast.Status // 现在还在运行中
-				tmpBalanceAmount := feeLevel1
+				tmpCurrentStatus := myLocationLast.Status        // 现在还在运行中
+				tmpBalanceAmount := feeLevel1 * rewardRate / 100 // 记录下一次
+				tmpBalanceCoinAmount := feeLevel1 * coinRewardRate / 100 * coinPrice / 1000
 				myLocationLast.Status = "running"
-				myLocationLast.Current += feeLevel1
+				myLocationLast.Current += tmpBalanceAmount
 				if myLocationLast.Current >= myLocationLast.CurrentMax { // 占位分红人分满停止
 					if "running" == tmpCurrentStatus {
 						myLocationLast.StopDate = time.Now().UTC().Add(8 * time.Hour)
@@ -1680,13 +1691,13 @@ func (uuc *UserUseCase) AdminDailyRecommendReward(ctx context.Context, req *v1.A
 				}
 
 				if 0 < tmpBalanceAmount {
-					err = uuc.locationRepo.UpdateLocation(ctx, myLocationLast.ID, myLocationLast.Status, tmpBalanceAmount, myLocationLast.StopDate) // 分红占位数据修改
+					err = uuc.locationRepo.UpdateLocationNew(ctx, myLocationLast.ID, myLocationLast.Status, tmpBalanceAmount, myLocationLast.StopDate, tmpBalanceCoinAmount) // 分红占位数据修改
 					if nil != err {
 						return err
 					}
 
 					if 0 < tmpBalanceAmount { // 这次还能分红
-						_, err = uuc.ubRepo.UserDailyRecommendArea(ctx, vLevel1, tmpBalanceAmount, tmpCurrentStatus)
+						_, err = uuc.ubRepo.UserDailyRecommendArea(ctx, vLevel1, tmpBalanceAmount, tmpBalanceCoinAmount, tmpCurrentStatus)
 						if nil != err {
 							return err
 						}
@@ -1706,17 +1717,18 @@ func (uuc *UserUseCase) AdminDailyRecommendReward(ctx context.Context, req *v1.A
 		feeLevel2 *= 100000
 		for _, vLevel2 := range level2 {
 			if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-				var myLocationLast *Location
+				var myLocationLast *LocationNew
 				// 获取当前用户的占位信息，已经有运行中的跳过
 				myLocationLast, err = uuc.locationRepo.GetMyLocationLast(ctx, vLevel2)
 				if nil == myLocationLast { // 无占位信息
 					return err
 				}
 
-				tmpCurrentStatus := myLocationLast.Status // 现在还在运行中
-				tmpBalanceAmount := feeLevel2
+				tmpCurrentStatus := myLocationLast.Status        // 现在还在运行中
+				tmpBalanceAmount := feeLevel2 * rewardRate / 100 // 记录下一次
+				tmpBalanceCoinAmount := feeLevel2 * coinRewardRate / 100 * coinPrice / 1000
 				myLocationLast.Status = "running"
-				myLocationLast.Current += feeLevel2
+				myLocationLast.Current += tmpBalanceAmount
 				if myLocationLast.Current >= myLocationLast.CurrentMax { // 占位分红人分满停止
 					if "running" == tmpCurrentStatus {
 						myLocationLast.StopDate = time.Now().UTC().Add(8 * time.Hour)
@@ -1725,13 +1737,13 @@ func (uuc *UserUseCase) AdminDailyRecommendReward(ctx context.Context, req *v1.A
 				}
 
 				if 0 < tmpBalanceAmount {
-					err = uuc.locationRepo.UpdateLocation(ctx, myLocationLast.ID, myLocationLast.Status, tmpBalanceAmount, myLocationLast.StopDate) // 分红占位数据修改
+					err = uuc.locationRepo.UpdateLocationNew(ctx, myLocationLast.ID, myLocationLast.Status, tmpBalanceAmount, myLocationLast.StopDate, tmpBalanceAmount) // 分红占位数据修改
 					if nil != err {
 						return err
 					}
 
 					if 0 < tmpBalanceAmount { // 这次还能分红
-						_, err = uuc.ubRepo.UserDailyRecommendArea(ctx, vLevel2, tmpBalanceAmount, tmpCurrentStatus)
+						_, err = uuc.ubRepo.UserDailyRecommendArea(ctx, vLevel2, tmpBalanceAmount, tmpBalanceCoinAmount, tmpCurrentStatus)
 						if nil != err {
 							return err
 						}
@@ -1751,17 +1763,18 @@ func (uuc *UserUseCase) AdminDailyRecommendReward(ctx context.Context, req *v1.A
 		feeLevel3 *= 100000
 		for _, vLevel3 := range level3 {
 			if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-				var myLocationLast *Location
+				var myLocationLast *LocationNew
 				// 获取当前用户的占位信息，已经有运行中的跳过
 				myLocationLast, err = uuc.locationRepo.GetMyLocationLast(ctx, vLevel3)
 				if nil == myLocationLast { // 无占位信息
 					return err
 				}
 
-				tmpCurrentStatus := myLocationLast.Status // 现在还在运行中
-				tmpBalanceAmount := feeLevel3
+				tmpCurrentStatus := myLocationLast.Status        // 现在还在运行中
+				tmpBalanceAmount := feeLevel3 * rewardRate / 100 // 记录下一次
+				tmpBalanceCoinAmount := feeLevel3 * coinRewardRate / 100 * coinPrice / 1000
 				myLocationLast.Status = "running"
-				myLocationLast.Current += feeLevel3
+				myLocationLast.Current += tmpBalanceAmount
 				if myLocationLast.Current >= myLocationLast.CurrentMax { // 占位分红人分满停止
 					if "running" == tmpCurrentStatus {
 						myLocationLast.StopDate = time.Now().UTC().Add(8 * time.Hour)
@@ -1770,13 +1783,13 @@ func (uuc *UserUseCase) AdminDailyRecommendReward(ctx context.Context, req *v1.A
 				}
 
 				if 0 < tmpBalanceAmount {
-					err = uuc.locationRepo.UpdateLocation(ctx, myLocationLast.ID, myLocationLast.Status, tmpBalanceAmount, myLocationLast.StopDate) // 分红占位数据修改
+					err = uuc.locationRepo.UpdateLocationNew(ctx, myLocationLast.ID, myLocationLast.Status, tmpBalanceAmount, myLocationLast.StopDate, tmpBalanceCoinAmount) // 分红占位数据修改
 					if nil != err {
 						return err
 					}
 
 					if 0 < tmpBalanceAmount { // 这次还能分红
-						_, err = uuc.ubRepo.UserDailyRecommendArea(ctx, vLevel3, tmpBalanceAmount, tmpCurrentStatus)
+						_, err = uuc.ubRepo.UserDailyRecommendArea(ctx, vLevel3, tmpBalanceAmount, tmpBalanceCoinAmount, tmpCurrentStatus)
 						if nil != err {
 							return err
 						}
@@ -1796,17 +1809,18 @@ func (uuc *UserUseCase) AdminDailyRecommendReward(ctx context.Context, req *v1.A
 		feeLevel4 *= 100000
 		for _, vLevel4 := range level4 {
 			if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-				var myLocationLast *Location
+				var myLocationLast *LocationNew
 				// 获取当前用户的占位信息，已经有运行中的跳过
 				myLocationLast, err = uuc.locationRepo.GetMyLocationLast(ctx, vLevel4)
 				if nil == myLocationLast { // 无占位信息
 					return err
 				}
 
-				tmpCurrentStatus := myLocationLast.Status // 现在还在运行中
-				tmpBalanceAmount := feeLevel4
+				tmpCurrentStatus := myLocationLast.Status        // 现在还在运行中
+				tmpBalanceAmount := feeLevel4 * rewardRate / 100 // 记录下一次
+				tmpBalanceCoinAmount := feeLevel4 * coinRewardRate / 100 * coinPrice / 1000
 				myLocationLast.Status = "running"
-				myLocationLast.Current += feeLevel4
+				myLocationLast.Current += tmpBalanceAmount
 				if myLocationLast.Current >= myLocationLast.CurrentMax { // 占位分红人分满停止
 					if "running" == tmpCurrentStatus {
 						myLocationLast.StopDate = time.Now().UTC().Add(8 * time.Hour)
@@ -1815,13 +1829,13 @@ func (uuc *UserUseCase) AdminDailyRecommendReward(ctx context.Context, req *v1.A
 				}
 
 				if 0 < tmpBalanceAmount {
-					err = uuc.locationRepo.UpdateLocation(ctx, myLocationLast.ID, myLocationLast.Status, tmpBalanceAmount, myLocationLast.StopDate) // 分红占位数据修改
+					err = uuc.locationRepo.UpdateLocationNew(ctx, myLocationLast.ID, myLocationLast.Status, tmpBalanceAmount, myLocationLast.StopDate, tmpBalanceCoinAmount) // 分红占位数据修改
 					if nil != err {
 						return err
 					}
 
 					if 0 < tmpBalanceAmount { // 这次还能分红
-						_, err = uuc.ubRepo.UserDailyRecommendArea(ctx, vLevel4, tmpBalanceAmount, tmpCurrentStatus)
+						_, err = uuc.ubRepo.UserDailyRecommendArea(ctx, vLevel4, tmpBalanceAmount, tmpBalanceCoinAmount, tmpCurrentStatus)
 						if nil != err {
 							return err
 						}

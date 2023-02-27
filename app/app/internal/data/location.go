@@ -170,9 +170,9 @@ func (lr *LocationRepo) GetLocationLast(ctx context.Context) (*biz.Location, err
 }
 
 // GetMyLocationLast .
-func (lr *LocationRepo) GetMyLocationLast(ctx context.Context, userId int64) (*biz.Location, error) {
-	var location Location
-	if err := lr.data.db.Table("location").Where("user_id", userId).Order("id desc").First(&location).Error; err != nil {
+func (lr *LocationRepo) GetMyLocationLast(ctx context.Context, userId int64) (*biz.LocationNew, error) {
+	var location LocationNew
+	if err := lr.data.db.Table("location_new").Where("user_id", userId).Order("id desc").First(&location).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.NotFound("LOCATION_NOT_FOUND", "location not found")
 		}
@@ -180,16 +180,13 @@ func (lr *LocationRepo) GetMyLocationLast(ctx context.Context, userId int64) (*b
 		return nil, errors.New(500, "LOCATION ERROR", err.Error())
 	}
 
-	return &biz.Location{
-		ID:           location.ID,
-		UserId:       location.UserId,
-		Status:       location.Status,
-		CurrentLevel: location.CurrentLevel,
-		Current:      location.Current,
-		CurrentMax:   location.CurrentMax,
-		Row:          location.Row,
-		Col:          location.Col,
-		StopDate:     location.StopDate,
+	return &biz.LocationNew{
+		ID:         location.ID,
+		UserId:     location.UserId,
+		Status:     location.Status,
+		Current:    location.Current,
+		CurrentMax: location.CurrentMax,
+		StopDate:   location.StopDate,
 	}, nil
 }
 
@@ -751,14 +748,14 @@ func (lr *LocationRepo) GetLocationUserCount(ctx context.Context) int64 {
 	var (
 		count int64
 	)
-	lr.data.db.Table("location").Group("user_id").Count(&count)
+	lr.data.db.Table("location_new").Group("user_id").Count(&count)
 	return count
 }
 
 // GetLocationByIds .
-func (lr *LocationRepo) GetLocationByIds(ctx context.Context, userIds ...int64) ([]*biz.Location, error) {
-	var locations []*Location
-	if err := lr.data.db.Table("location").
+func (lr *LocationRepo) GetLocationByIds(ctx context.Context, userIds ...int64) ([]*biz.LocationNew, error) {
+	var locations []*LocationNew
+	if err := lr.data.db.Table("location_new").
 		Where("user_id IN (?)", userIds).
 		Find(&locations).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -768,17 +765,14 @@ func (lr *LocationRepo) GetLocationByIds(ctx context.Context, userIds ...int64) 
 		return nil, errors.New(500, "LOCATION ERROR", err.Error())
 	}
 
-	res := make([]*biz.Location, 0)
+	res := make([]*biz.LocationNew, 0)
 	for _, location := range locations {
-		res = append(res, &biz.Location{
-			ID:           location.ID,
-			UserId:       location.UserId,
-			Status:       location.Status,
-			CurrentLevel: location.CurrentLevel,
-			Current:      location.Current,
-			CurrentMax:   location.CurrentMax,
-			Row:          location.Row,
-			Col:          location.Col,
+		res = append(res, &biz.LocationNew{
+			ID:         location.ID,
+			UserId:     location.UserId,
+			Status:     location.Status,
+			Current:    location.Current,
+			CurrentMax: location.CurrentMax,
 		})
 	}
 
