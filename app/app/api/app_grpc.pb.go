@@ -40,6 +40,7 @@ type AppClient interface {
 	AdminWithdraw(ctx context.Context, in *AdminWithdrawRequest, opts ...grpc.CallOption) (*AdminWithdrawReply, error)
 	AdminWithdrawEth(ctx context.Context, in *AdminWithdrawEthRequest, opts ...grpc.CallOption) (*AdminWithdrawEthReply, error)
 	AdminFee(ctx context.Context, in *AdminFeeRequest, opts ...grpc.CallOption) (*AdminFeeReply, error)
+	AdminDailyLocationReward(ctx context.Context, in *AdminDailyLocationRewardRequest, opts ...grpc.CallOption) (*AdminDailyLocationRewardReply, error)
 	AdminDailyFee(ctx context.Context, in *AdminDailyFeeRequest, opts ...grpc.CallOption) (*AdminDailyFeeReply, error)
 	AdminAll(ctx context.Context, in *AdminAllRequest, opts ...grpc.CallOption) (*AdminAllReply, error)
 	AdminUserRecommend(ctx context.Context, in *AdminUserRecommendRequest, opts ...grpc.CallOption) (*AdminUserRecommendReply, error)
@@ -228,6 +229,15 @@ func (c *appClient) AdminWithdrawEth(ctx context.Context, in *AdminWithdrawEthRe
 func (c *appClient) AdminFee(ctx context.Context, in *AdminFeeRequest, opts ...grpc.CallOption) (*AdminFeeReply, error) {
 	out := new(AdminFeeReply)
 	err := c.cc.Invoke(ctx, "/api.App/AdminFee", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appClient) AdminDailyLocationReward(ctx context.Context, in *AdminDailyLocationRewardRequest, opts ...grpc.CallOption) (*AdminDailyLocationRewardReply, error) {
+	out := new(AdminDailyLocationRewardReply)
+	err := c.cc.Invoke(ctx, "/api.App/AdminDailyLocationReward", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -454,6 +464,7 @@ type AppServer interface {
 	AdminWithdraw(context.Context, *AdminWithdrawRequest) (*AdminWithdrawReply, error)
 	AdminWithdrawEth(context.Context, *AdminWithdrawEthRequest) (*AdminWithdrawEthReply, error)
 	AdminFee(context.Context, *AdminFeeRequest) (*AdminFeeReply, error)
+	AdminDailyLocationReward(context.Context, *AdminDailyLocationRewardRequest) (*AdminDailyLocationRewardReply, error)
 	AdminDailyFee(context.Context, *AdminDailyFeeRequest) (*AdminDailyFeeReply, error)
 	AdminAll(context.Context, *AdminAllRequest) (*AdminAllReply, error)
 	AdminUserRecommend(context.Context, *AdminUserRecommendRequest) (*AdminUserRecommendReply, error)
@@ -536,6 +547,9 @@ func (UnimplementedAppServer) AdminWithdrawEth(context.Context, *AdminWithdrawEt
 }
 func (UnimplementedAppServer) AdminFee(context.Context, *AdminFeeRequest) (*AdminFeeReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AdminFee not implemented")
+}
+func (UnimplementedAppServer) AdminDailyLocationReward(context.Context, *AdminDailyLocationRewardRequest) (*AdminDailyLocationRewardReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AdminDailyLocationReward not implemented")
 }
 func (UnimplementedAppServer) AdminDailyFee(context.Context, *AdminDailyFeeRequest) (*AdminDailyFeeReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AdminDailyFee not implemented")
@@ -936,6 +950,24 @@ func _App_AdminFee_Handler(srv interface{}, ctx context.Context, dec func(interf
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AppServer).AdminFee(ctx, req.(*AdminFeeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _App_AdminDailyLocationReward_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AdminDailyLocationRewardRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppServer).AdminDailyLocationReward(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.App/AdminDailyLocationReward",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppServer).AdminDailyLocationReward(ctx, req.(*AdminDailyLocationRewardRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1414,6 +1446,10 @@ var App_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AdminFee",
 			Handler:    _App_AdminFee_Handler,
+		},
+		{
+			MethodName: "AdminDailyLocationReward",
+			Handler:    _App_AdminDailyLocationReward_Handler,
 		},
 		{
 			MethodName: "AdminDailyFee",

@@ -538,6 +538,10 @@ func (a *AppService) CheckAndInsertRecommendArea(ctx context.Context, req *v1.Ch
 	return a.uuc.CheckAndInsertRecommendArea(ctx, req)
 }
 
+func (a *AppService) AdminDailyLocationReward(ctx context.Context, req *v1.AdminDailyLocationRewardRequest) (*v1.AdminDailyLocationRewardReply, error) {
+	return a.uuc.AdminDailyLocationReward(ctx, req)
+}
+
 func (a *AppService) AdminDailyRecommendReward(ctx context.Context, req *v1.AdminDailyRecommendRewardRequest) (*v1.AdminDailyRecommendRewardReply, error) {
 	return a.uuc.AdminDailyRecommendReward(ctx, req)
 }

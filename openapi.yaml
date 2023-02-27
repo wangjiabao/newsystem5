@@ -311,6 +311,30 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /api/admin_dhb/daily_location_reward:
+        get:
+            tags:
+                - App
+            operationId: App_AdminDailyLocationReward
+            parameters:
+                - name: day
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AdminDailyLocationRewardReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /api/admin_dhb/daily_recommend_reward:
         get:
             tags:
@@ -1020,6 +1044,9 @@ components:
                 password:
                     type: string
         AdminDailyFeeReply:
+            type: object
+            properties: {}
+        AdminDailyLocationRewardReply:
             type: object
             properties: {}
         AdminDailyRecommendRewardReply:

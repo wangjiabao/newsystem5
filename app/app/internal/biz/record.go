@@ -73,15 +73,15 @@ type LocationRepo interface {
 	CreateLocation(ctx context.Context, rel *Location) (*Location, error)
 	GetLocationLast(ctx context.Context) (*Location, error)
 	GetMyLocationLast(ctx context.Context, userId int64) (*Location, error)
-	GetLocationDailyYesterday(ctx context.Context, day int) ([]*Location, error)
+	GetLocationDailyYesterday(ctx context.Context, day int) ([]*LocationNew, error)
 	GetMyStopLocationLast(ctx context.Context, userId int64) (*Location, error)
 	GetMyLocationRunningLast(ctx context.Context, userId int64) (*Location, error)
 	GetLocationsByUserId(ctx context.Context, userId int64) ([]*Location, error)
 	GetRewardLocationByRowOrCol(ctx context.Context, row int64, col int64, locationRowConfig int64) ([]*Location, error)
 	GetRewardLocationByIds(ctx context.Context, ids ...int64) (map[int64]*Location, error)
 	UpdateLocation(ctx context.Context, id int64, status string, current int64, stopDate time.Time) error
-	GetLocations(ctx context.Context, b *Pagination, userId int64) ([]*Location, error, int64)
-	GetLocationsAll(ctx context.Context, b *Pagination, userId int64) ([]*Location, error, int64)
+	GetLocations(ctx context.Context, b *Pagination, userId int64) ([]*LocationNew, error, int64)
+	GetLocationsAll(ctx context.Context, b *Pagination, userId int64) ([]*LocationNew, error, int64)
 	UpdateLocationRowAndCol(ctx context.Context, id int64) error
 	GetLocationsStopNotUpdate(ctx context.Context) ([]*Location, error)
 	LockGlobalLocation(ctx context.Context) (bool, error)
@@ -98,6 +98,7 @@ type LocationRepo interface {
 	GetMyStopLocationsLast(ctx context.Context, userId int64) ([]*LocationNew, error)
 	GetLocationsNewByUserId(ctx context.Context, userId int64) ([]*LocationNew, error)
 	UpdateLocationNew(ctx context.Context, id int64, status string, current int64, stopDate time.Time, stopCoin int64) error
+	GetRunningLocations(ctx context.Context) ([]*LocationNew, error)
 }
 
 func NewRecordUseCase(

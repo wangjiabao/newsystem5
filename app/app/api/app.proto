@@ -127,6 +127,12 @@ service App {
 		};
 	};
 
+	rpc AdminDailyLocationReward (AdminDailyLocationRewardRequest) returns (AdminDailyLocationRewardReply) {
+		option (google.api.http) = {
+			get: "/api/admin_dhb/daily_location_reward"
+		};
+	};
+
 	rpc AdminDailyFee (AdminDailyFeeRequest) returns (AdminDailyFeeReply) {
 		option (google.api.http) = {
 			get: "/api/admin_dhb/daily_fee"
@@ -808,4 +814,11 @@ message AdminCreateAccountRequest {
 
 message AdminCreateAccountReply {
 
+}
+
+message AdminDailyLocationRewardRequest {
+	int32 day = 1;
+}
+
+message AdminDailyLocationRewardReply {
 }

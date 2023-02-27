@@ -104,10 +104,10 @@ func (lr *LocationRepo) CreateLocationNew(ctx context.Context, rel *biz.Location
 }
 
 // GetLocationDailyYesterday .
-func (lr *LocationRepo) GetLocationDailyYesterday(ctx context.Context, day int) ([]*biz.Location, error) {
-	var locations []*Location
-	res := make([]*biz.Location, 0)
-	instance := lr.data.db.Table("location")
+func (lr *LocationRepo) GetLocationDailyYesterday(ctx context.Context, day int) ([]*biz.LocationNew, error) {
+	var locations []*LocationNew
+	res := make([]*biz.LocationNew, 0)
+	instance := lr.data.db.Table("location_new")
 
 	now := time.Now().UTC().AddDate(0, 0, day)
 	var startDate time.Time
@@ -133,13 +133,13 @@ func (lr *LocationRepo) GetLocationDailyYesterday(ctx context.Context, day int) 
 	}
 
 	for _, v := range locations {
-		res = append(res, &biz.Location{
-			ID:           v.ID,
-			UserId:       v.UserId,
-			Status:       v.Status,
-			CurrentLevel: v.CurrentLevel,
-			Current:      v.Current,
-			CurrentMax:   v.CurrentMax,
+		res = append(res, &biz.LocationNew{
+			ID:         v.ID,
+			UserId:     v.UserId,
+			Status:     v.Status,
+			Current:    v.Current,
+			CurrentMax: v.CurrentMax,
+			OutRate:    v.OutRate,
 		})
 	}
 
@@ -539,6 +539,36 @@ func (lr *LocationRepo) UpdateLocationNew(ctx context.Context, id int64, status 
 	return nil
 }
 
+// GetRunningLocations .
+func (lr *LocationRepo) GetRunningLocations(ctx context.Context) ([]*biz.LocationNew, error) {
+	var locations []*LocationNew
+	res := make([]*biz.LocationNew, 0)
+	if err := lr.data.db.Table("location_new").
+		Where("status=?", "running").
+		Where("created_at>=?", time.Date(2023, 2, 21, 12, 0, 0, 0, time.UTC)).
+		Find(&locations).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, errors.NotFound("LOCATION_NOT_FOUND", "location not found")
+		}
+
+		return nil, errors.New(500, "LOCATION ERROR", err.Error())
+	}
+
+	for _, location := range locations {
+		res = append(res, &biz.LocationNew{
+			ID:         location.ID,
+			UserId:     location.UserId,
+			Status:     location.Status,
+			Current:    location.Current,
+			CurrentMax: location.CurrentMax,
+			CreatedAt:  location.CreatedAt,
+			OutRate:    location.OutRate,
+		})
+	}
+
+	return res, nil
+}
+
 // UpdateLocationRowAndCol 事务中使用 .
 func (lr *LocationRepo) UpdateLocationRowAndCol(ctx context.Context, id int64) error {
 
@@ -645,12 +675,12 @@ func (lr *LocationRepo) GetRewardLocationByIds(ctx context.Context, ids ...int64
 }
 
 // GetLocations .
-func (lr *LocationRepo) GetLocations(ctx context.Context, b *biz.Pagination, userId int64) ([]*biz.Location, error, int64) {
+func (lr *LocationRepo) GetLocations(ctx context.Context, b *biz.Pagination, userId int64) ([]*biz.LocationNew, error, int64) {
 	var (
 		locations []*Location
 		count     int64
 	)
-	instance := lr.data.db.Table("location").Where("status=?", "running")
+	instance := lr.data.db.Table("location_new").Where("status=?", "running")
 
 	if 0 < userId {
 		instance = instance.Where("user_id=?", userId)
@@ -665,18 +695,15 @@ func (lr *LocationRepo) GetLocations(ctx context.Context, b *biz.Pagination, use
 		return nil, errors.New(500, "LOCATION ERROR", err.Error()), 0
 	}
 
-	res := make([]*biz.Location, 0)
+	res := make([]*biz.LocationNew, 0)
 	for _, location := range locations {
-		res = append(res, &biz.Location{
-			ID:           location.ID,
-			UserId:       location.UserId,
-			Status:       location.Status,
-			CurrentLevel: location.CurrentLevel,
-			Current:      location.Current,
-			CurrentMax:   location.CurrentMax,
-			Row:          location.Row,
-			Col:          location.Col,
-			CreatedAt:    location.CreatedAt,
+		res = append(res, &biz.LocationNew{
+			ID:         location.ID,
+			UserId:     location.UserId,
+			Status:     location.Status,
+			Current:    location.Current,
+			CurrentMax: location.CurrentMax,
+			CreatedAt:  location.CreatedAt,
 		})
 	}
 
@@ -684,12 +711,12 @@ func (lr *LocationRepo) GetLocations(ctx context.Context, b *biz.Pagination, use
 }
 
 // GetLocationsAll .
-func (lr *LocationRepo) GetLocationsAll(ctx context.Context, b *biz.Pagination, userId int64) ([]*biz.Location, error, int64) {
+func (lr *LocationRepo) GetLocationsAll(ctx context.Context, b *biz.Pagination, userId int64) ([]*biz.LocationNew, error, int64) {
 	var (
-		locations []*Location
+		locations []*LocationNew
 		count     int64
 	)
-	instance := lr.data.db.Table("location")
+	instance := lr.data.db.Table("location_new")
 
 	if 0 < userId {
 		instance = instance.Where("user_id=?", userId)
@@ -704,18 +731,15 @@ func (lr *LocationRepo) GetLocationsAll(ctx context.Context, b *biz.Pagination, 
 		return nil, errors.New(500, "LOCATION ERROR", err.Error()), 0
 	}
 
-	res := make([]*biz.Location, 0)
+	res := make([]*biz.LocationNew, 0)
 	for _, location := range locations {
-		res = append(res, &biz.Location{
-			ID:           location.ID,
-			UserId:       location.UserId,
-			Status:       location.Status,
-			CurrentLevel: location.CurrentLevel,
-			Current:      location.Current,
-			CurrentMax:   location.CurrentMax,
-			Row:          location.Row,
-			Col:          location.Col,
-			CreatedAt:    location.CreatedAt,
+		res = append(res, &biz.LocationNew{
+			ID:         location.ID,
+			UserId:     location.UserId,
+			Status:     location.Status,
+			Current:    location.Current,
+			CurrentMax: location.CurrentMax,
+			CreatedAt:  location.CreatedAt,
 		})
 	}
 
