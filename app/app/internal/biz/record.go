@@ -173,10 +173,17 @@ func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord
 			myUserRecommendUserInfo          *UserInfo
 			myUserRecommendUserLocationsLast []*LocationNew
 			myLastStopLocations              []*LocationNew
+			myLocations                      []*LocationNew
 			tmpRecommendUserIds              []string
 			dhbAmount                        int64
 			err                              error
 		)
+
+		// 获取当前用户的占位信息，已经有运行中的跳过
+		myLocations, err = ruc.locationRepo.GetLocationsNewByUserId(ctx, v.UserId)
+		if nil == myLocations { // 查询异常跳过本次循环
+			continue
+		}
 
 		// 金额
 		locationCurrentMax = v.RelAmount * outRate
@@ -231,6 +238,36 @@ func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord
 
 			// 推荐人
 			if nil != myUserRecommendUserInfo {
+
+				if 0 == len(myLocations) { // vip 等级调整，被推荐人首次入单
+					myUserRecommendUserInfo.HistoryRecommend += 1
+					if myUserRecommendUserInfo.HistoryRecommend >= 10 {
+						myUserRecommendUserInfo.Vip = 5
+					} else if myUserRecommendUserInfo.HistoryRecommend >= 8 {
+						myUserRecommendUserInfo.Vip = 4
+					} else if myUserRecommendUserInfo.HistoryRecommend >= 6 {
+						myUserRecommendUserInfo.Vip = 3
+					} else if myUserRecommendUserInfo.HistoryRecommend >= 4 {
+						myUserRecommendUserInfo.Vip = 2
+					} else if myUserRecommendUserInfo.HistoryRecommend >= 2 {
+						myUserRecommendUserInfo.Vip = 1
+					}
+
+					_, err = ruc.userInfoRepo.UpdateUserInfo(ctx, myUserRecommendUserInfo) // 推荐人信息修改
+					if nil != err {
+						return err
+					}
+
+					_, err = ruc.userCurrentMonthRecommendRepo.CreateUserCurrentMonthRecommend(ctx, &UserCurrentMonthRecommend{ // 直推人本月推荐人数
+						UserId:          myUserRecommendUserId,
+						RecommendUserId: v.UserId,
+						Date:            time.Now().UTC().Add(8 * time.Hour),
+					})
+					if nil != err {
+						return err
+					}
+				}
+
 				// 有占位信息，推荐人第一代
 				myUserRecommendUserLocationsLast, err = ruc.locationRepo.GetLocationsNewByUserId(ctx, myUserRecommendUserInfo.UserId)
 				if nil != myUserRecommendUserLocationsLast {
@@ -342,16 +379,19 @@ func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord
 func (ruc *RecordUseCase) AdminLocationInsert(ctx context.Context, userId int64, amount int64) (bool, error) {
 
 	var (
-		currentLocation     *LocationNew
-		myLastStopLocations []*LocationNew
-		stopCoin            int64
-		err                 error
-		configs             []*Config
-		userRecommend       *UserRecommend
-		tmpRecommendUserIds []string
-		locationCurrent     int64
-		outRate             int64
-		timeAgain           int64
+		currentLocation         *LocationNew
+		myLastStopLocations     []*LocationNew
+		stopCoin                int64
+		err                     error
+		configs                 []*Config
+		myLocations             []*LocationNew
+		userRecommend           *UserRecommend
+		tmpRecommendUserIds     []string
+		myUserRecommendUserInfo *UserInfo
+		myUserRecommendUserId   int64
+		locationCurrent         int64
+		outRate                 int64
+		timeAgain               int64
 	)
 	// 配置
 	configs, _ = ruc.configRepo.GetConfigByKeys(ctx, "time_again", "out_rate")
@@ -363,6 +403,12 @@ func (ruc *RecordUseCase) AdminLocationInsert(ctx context.Context, userId int64,
 				outRate, _ = strconv.ParseInt(vConfig.Value, 10, 64)
 			}
 		}
+	}
+
+	// 获取当前用户的占位信息，已经有运行中的跳过
+	myLocations, err = ruc.locationRepo.GetLocationsNewByUserId(ctx, userId)
+	if nil == myLocations { // 查询异常跳过本次循环
+		return false, errors.New(500, "ERROR", "输入金额错误，重试")
 	}
 
 	// 冻结
@@ -384,6 +430,30 @@ func (ruc *RecordUseCase) AdminLocationInsert(ctx context.Context, userId int64,
 	}
 	if "" != userRecommend.RecommendCode {
 		tmpRecommendUserIds = strings.Split(userRecommend.RecommendCode, "D")
+		if 2 <= len(tmpRecommendUserIds) {
+			myUserRecommendUserId, _ = strconv.ParseInt(tmpRecommendUserIds[len(tmpRecommendUserIds)-1], 10, 64) // 最后一位是直推人
+		}
+	}
+
+	if 0 < myUserRecommendUserId {
+		myUserRecommendUserInfo, err = ruc.userInfoRepo.GetUserInfoByUserId(ctx, myUserRecommendUserId)
+	}
+	// 推荐人
+	if nil != myUserRecommendUserInfo {
+		if 0 == len(myLocations) { // vip 等级调整，被推荐人首次入单
+			myUserRecommendUserInfo.HistoryRecommend += 1
+			if myUserRecommendUserInfo.HistoryRecommend >= 10 {
+				myUserRecommendUserInfo.Vip = 5
+			} else if myUserRecommendUserInfo.HistoryRecommend >= 8 {
+				myUserRecommendUserInfo.Vip = 4
+			} else if myUserRecommendUserInfo.HistoryRecommend >= 6 {
+				myUserRecommendUserInfo.Vip = 3
+			} else if myUserRecommendUserInfo.HistoryRecommend >= 4 {
+				myUserRecommendUserInfo.Vip = 2
+			} else if myUserRecommendUserInfo.HistoryRecommend >= 2 {
+				myUserRecommendUserInfo.Vip = 1
+			}
+		}
 	}
 
 	if err = ruc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
@@ -401,6 +471,20 @@ func (ruc *RecordUseCase) AdminLocationInsert(ctx context.Context, userId int64,
 			OutRate:    outRate,
 			StopDate:   tmpStopDate,
 			CurrentMax: amount * 10000000000 * outRate,
+		})
+		if nil != err {
+			return err
+		}
+
+		_, err = ruc.userInfoRepo.UpdateUserInfo(ctx, myUserRecommendUserInfo) // 推荐人信息修改
+		if nil != err {
+			return err
+		}
+
+		_, err = ruc.userCurrentMonthRecommendRepo.CreateUserCurrentMonthRecommend(ctx, &UserCurrentMonthRecommend{ // 直推人本月推荐人数
+			UserId:          myUserRecommendUserId,
+			RecommendUserId: userId,
+			Date:            time.Now().UTC().Add(8 * time.Hour),
 		})
 		if nil != err {
 			return err
