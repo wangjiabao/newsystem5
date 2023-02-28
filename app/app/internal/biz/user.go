@@ -147,7 +147,7 @@ type UserBalanceRepo interface {
 	LocationReward(ctx context.Context, userId int64, amount int64, locationId int64, myLocationId int64, locationType string, status string) (int64, error)
 	WithdrawReward(ctx context.Context, userId int64, amount int64, locationId int64, myLocationId int64, locationType string, status string) (int64, error)
 	RecommendReward(ctx context.Context, userId int64, amount int64, locationId int64, status string) (int64, error)
-	RecommendTopReward(ctx context.Context, userId int64, amount int64, amountDhb int64, locationId int64, vip int64, status string) (int64, error)
+	RecommendTeamReward(ctx context.Context, userId int64, amount int64, amountDhb int64, locationId int64, vip int64, status string) (int64, error)
 	SystemWithdrawReward(ctx context.Context, amount int64, locationId int64) error
 	SystemReward(ctx context.Context, amount int64, locationId int64) error
 	SystemDailyReward(ctx context.Context, amount int64, locationId int64) error
@@ -1613,7 +1613,7 @@ func (uuc *UserUseCase) AdminDailyLocationReward(ctx context.Context, req *v1.Ad
 									}
 
 									if 0 < tmpBalanceAmount { // 这次还能分红
-										_, err = uuc.ubRepo.RecommendTopReward(ctx, tmpMyTopUserRecommendUserId, tmpBalanceAmount, tmpMyRecommendAmountCoin, vUserLocations.ID, myUserTopRecommendUserInfo.HistoryRecommend, tmpStatus) // 推荐人奖励
+										_, err = uuc.ubRepo.RecommendTeamReward(ctx, tmpMyTopUserRecommendUserId, tmpBalanceAmount, tmpMyRecommendAmountCoin, vUserLocations.ID, myUserTopRecommendUserInfo.HistoryRecommend, tmpStatus) // 推荐人奖励
 										if nil != err {
 											return err
 										}

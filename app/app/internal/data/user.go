@@ -1669,7 +1669,7 @@ func (ub *UserBalanceRepo) RecommendReward(ctx context.Context, userId int64, am
 }
 
 // RecommendTopReward .
-func (ub *UserBalanceRepo) RecommendTopReward(ctx context.Context, userId int64, amount int64, amountDhb int64, locationId int64, vip int64, status string) (int64, error) {
+func (ub *UserBalanceRepo) RecommendTeamReward(ctx context.Context, userId int64, amount int64, amountDhb int64, locationId int64, vip int64, status string) (int64, error) {
 	var err error
 	if "running" == status {
 		if err = ub.data.DB(ctx).Table("user_balance").
@@ -1701,7 +1701,7 @@ func (ub *UserBalanceRepo) RecommendTopReward(ctx context.Context, userId int64,
 	reward.BalanceRecordId = userBalanceRecode.ID
 	reward.Type = "system_reward_daily" // 本次分红的行为类型
 	reward.TypeRecordId = locationId
-	reward.Reason = "recommend_vip_top" // 给我分红的理由
+	reward.Reason = "recommend_team" // 给我分红的理由
 	reward.ReasonLocationId = vip
 	err = ub.data.DB(ctx).Table("reward").Create(&reward).Error
 	if err != nil {
