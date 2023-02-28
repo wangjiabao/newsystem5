@@ -184,6 +184,19 @@ func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord
 		if nil == myLocations { // 查询异常跳过本次循环
 			continue
 		}
+		if 0 < len(myLocations) { // 也代表复投
+			tmpStatusRunning := false
+			for _, vMyLocations := range myLocations {
+				if "running" == vMyLocations.Status {
+					tmpStatusRunning = true
+					break
+				}
+			}
+
+			if tmpStatusRunning { // 有运行中直接跳过本次循环
+				continue
+			}
+		}
 
 		// 金额
 		locationCurrentMax = v.RelAmount * outRate
@@ -409,6 +422,19 @@ func (ruc *RecordUseCase) AdminLocationInsert(ctx context.Context, userId int64,
 	myLocations, err = ruc.locationRepo.GetLocationsNewByUserId(ctx, userId)
 	if nil == myLocations { // 查询异常跳过本次循环
 		return false, errors.New(500, "ERROR", "输入金额错误，重试")
+	}
+	if 0 < len(myLocations) { // 也代表复投
+		tmpStatusRunning := false
+		for _, vMyLocations := range myLocations {
+			if "running" == vMyLocations.Status {
+				tmpStatusRunning = true
+				break
+			}
+		}
+
+		if tmpStatusRunning { // 有运行中直接跳过本次循环
+			return false, errors.New(500, "ERROR", "已存在运行中位置信息")
+		}
 	}
 
 	// 冻结
