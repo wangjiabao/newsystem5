@@ -201,7 +201,7 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 
 			// 最少百位以上
 			lenValue := len(vDepositUsdtResult.Value)
-			if 17 > lenValue {
+			if 19 > lenValue {
 				continue
 			}
 			// 去掉8个尾数0作为系统金额
@@ -212,7 +212,7 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 			//fmt.Println(vDepositUsdtResult.Value, tmpValue)
 			tmpValue = tmpValue * 100 / 75 // 4个地址分，精度目前只识别到这里，如果有人
 			//fmt.Println(tmpValue)
-			if int64(100000000) > tmpValue { // 目前0.1表示
+			if int64(10000000000) > tmpValue { // 目前0.1表示
 				continue
 			}
 
@@ -222,7 +222,7 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 				Status:    "success",
 				Type:      "deposit",
 				Amount:    strconv.FormatInt(tmpValue, 10) + "00000000",
-				RelAmount: tmpValue * 1000,
+				RelAmount: tmpValue * 100, // todo 改目前放大100倍率
 				CoinType:  "USDT",
 			})
 
@@ -257,15 +257,15 @@ type eth struct {
 }
 
 func requestEthDepositResult(offset int64, page int64, contractAddress string) (map[string]*eth, error) {
-	apiUrl := "https://api-testnet.bscscan.com/api"
-	//apiUrl := "https://api.bscscan.com/api"
+	//apiUrl := "https://api-testnet.bscscan.com/api"
+	apiUrl := "https://api.bscscan.com/api"
 	// URL param
 	data := url.Values{}
 	data.Set("module", "account")
 	data.Set("action", "tokentx")
 	data.Set("contractaddress", contractAddress)
 	data.Set("apikey", "CRCSHR2G3WXB1MET3BNA7ZQKQVSNXFYX18")
-	data.Set("address", "0xe865f2e5ff04B8b7952d1C0d9163A91F313b158f")
+	data.Set("address", "")
 	data.Set("sort", "desc")
 	data.Set("offset", strconv.FormatInt(offset, 10))
 	data.Set("page", strconv.FormatInt(page, 10))
@@ -307,7 +307,7 @@ func requestEthDepositResult(offset int64, page int64, contractAddress string) (
 
 	res := make(map[string]*eth, 0)
 	for _, v := range i.Result {
-		if "0xe865f2e5ff04b8b7952d1c0d9163a91f313b158f" == v.To { // 接收者
+		if "" == v.To { // 接收者
 			res[v.Hash] = v
 		}
 	}
@@ -586,7 +586,7 @@ func (a *AppService) AdminWithdrawEth(ctx context.Context, req *v1.AdminWithdraw
 		}
 
 		if "dhb" == withdraw.Type {
-			tokenAddress = "0x96BD81715c69eE013405B4005Ba97eA1f420fd87"
+			tokenAddress = ""
 		} else if "usdt" == withdraw.Type {
 			//tokenAddress = "0x337610d27c682E347C9cD60BD4b3b107C9d34dDd"
 			tokenAddress = "0x55d398326f99059fF775485246999027B3197955"
@@ -599,7 +599,7 @@ func (a *AppService) AdminWithdrawEth(ctx context.Context, req *v1.AdminWithdraw
 			continue
 		}
 
-		withDrawAmount := strconv.FormatInt(withdraw.RelAmount, 10) + "00000000" // 补八个0.系统基础1是10个0
+		withDrawAmount := strconv.FormatInt(withdraw.RelAmount, 10) + "000000" // 补八个0.系统基础1是10个0 todo 目前缩小100
 
 		for i := 0; i < 3; i++ {
 			//fmt.Println(11111, user.ToAddress, v.Amount, balanceInt)
@@ -610,7 +610,7 @@ func (a *AppService) AdminWithdrawEth(ctx context.Context, req *v1.AdminWithdraw
 				//time.Sleep(3 * time.Second)
 				break
 			} else if "insufficient funds for gas * price + value" == err.Error() {
-				_, _, err = toBnB("0xe865f2e5ff04B8b7952d1C0d9163A91F313b158f", "", 400000000000000000)
+				_, _, err = toBnB("", "", 400000000000000000)
 				if nil != err {
 					fmt.Println(5555, err)
 					continue
