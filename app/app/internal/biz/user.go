@@ -1381,7 +1381,6 @@ func (uuc *UserUseCase) AdminWithdraw(ctx context.Context, req *v1.AdminWithdraw
 	var (
 		currentValue    int64
 		myLocationLast  *Location
-		withdrawAmount  int64
 		withdrawNotDeal []*Withdraw
 		configs         []*Config
 		withdrawRate    int64
@@ -1410,31 +1409,30 @@ func (uuc *UserUseCase) AdminWithdraw(ctx context.Context, req *v1.AdminWithdraw
 		currentValue = withdraw.Amount
 
 		if "dhb" == withdraw.Type { // 提现dhb
-			//if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-			//	_, err = uuc.ubRepo.UpdateWithdraw(ctx, withdraw.ID, "pass")
-			//	if nil != err {
-			//		return err
-			//	}
-			//
-			//	return nil
-			//}); nil != err {
-			//
-			//	return nil, err
-			//}
+			if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+				_, err = uuc.ubRepo.UpdateWithdrawAmount(ctx, withdraw.ID, "rewarded", currentValue)
+				if nil != err {
+					return err
+				}
+
+				return nil
+			}); nil != err {
+				return nil, err
+			}
 
 			continue
 		}
 
 		if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-			currentValue -= withdraw.Amount / 100 * withdrawRate // 手续费
+			currentValue -= withdraw.Amount * withdrawRate / 100 // 手续费
 			fmt.Println(withdraw.Amount, currentValue)
 			// 手续费记录
-			err = uuc.ubRepo.SystemFee(ctx, withdraw.Amount/100*withdrawRate, myLocationLast.ID)
+			err = uuc.ubRepo.SystemFee(ctx, withdraw.Amount*withdrawRate/100, myLocationLast.ID)
 			if nil != err {
 				return err
 			}
 
-			_, err = uuc.ubRepo.UpdateWithdrawAmount(ctx, withdraw.ID, "rewarded", withdrawAmount)
+			_, err = uuc.ubRepo.UpdateWithdrawAmount(ctx, withdraw.ID, "rewarded", currentValue)
 			if nil != err {
 				return err
 			}
