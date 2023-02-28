@@ -297,9 +297,9 @@ func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord
 						tmpStatus := myUserRecommendUserLocationLast.Status // 现在还在运行中
 
 						// 奖励usdt
-						tmpBalanceAmount := myUserRecommendUserLocationLast.CurrentMax / myUserRecommendUserLocationLast.OutRate / 100 * recommendNeed / 100 * rewardRate // 记录下一次
+						tmpBalanceAmount := currentValue / myUserRecommendUserLocationLast.OutRate / 100 * recommendNeed / 100 * rewardRate // 记录下一次
 						// 奖励币
-						tmpBalanceCoinAmount := myUserRecommendUserLocationLast.CurrentMax / myUserRecommendUserLocationLast.OutRate / 100 * recommendNeed / 100 * coinRewardRate / 1000 * coinPrice
+						tmpBalanceCoinAmount := currentValue / myUserRecommendUserLocationLast.OutRate / 100 * recommendNeed / 100 * coinRewardRate / 1000 * coinPrice
 
 						myUserRecommendUserLocationLast.Status = "running"
 						myUserRecommendUserLocationLast.Current += tmpBalanceAmount
