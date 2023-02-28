@@ -542,7 +542,6 @@ func (lr *LocationRepo) GetRunningLocations(ctx context.Context) ([]*biz.Locatio
 	res := make([]*biz.LocationNew, 0)
 	if err := lr.data.db.Table("location_new").
 		Where("status=?", "running").
-		Where("created_at>=?", time.Date(2023, 2, 21, 12, 0, 0, 0, time.UTC)).
 		Find(&locations).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return res, errors.NotFound("LOCATION_NOT_FOUND", "location not found")

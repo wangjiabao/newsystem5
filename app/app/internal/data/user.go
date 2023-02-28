@@ -1669,12 +1669,12 @@ func (ub *UserBalanceRepo) RecommendReward(ctx context.Context, userId int64, am
 }
 
 // RecommendTopReward .
-func (ub *UserBalanceRepo) RecommendTopReward(ctx context.Context, userId int64, amount int64, locationId int64, vip int64, status string) (int64, error) {
+func (ub *UserBalanceRepo) RecommendTopReward(ctx context.Context, userId int64, amount int64, amountDhb int64, locationId int64, vip int64, status string) (int64, error) {
 	var err error
 	if "running" == status {
 		if err = ub.data.DB(ctx).Table("user_balance").
 			Where("user_id=?", userId).
-			Updates(map[string]interface{}{"balance_usdt": gorm.Expr("balance_usdt + ?", amount)}).Error; nil != err {
+			Updates(map[string]interface{}{"balance_usdt": gorm.Expr("balance_usdt + ?", amount), "balance_dhb": gorm.Expr("balance_dhb + ?", amountDhb)}).Error; nil != err {
 			return 0, errors.NotFound("user balance err", "user balance not found")
 		}
 	}
@@ -1699,7 +1699,7 @@ func (ub *UserBalanceRepo) RecommendTopReward(ctx context.Context, userId int64,
 	reward.UserId = userBalance.UserId
 	reward.Amount = amount
 	reward.BalanceRecordId = userBalanceRecode.ID
-	reward.Type = "location" // 本次分红的行为类型
+	reward.Type = "system_reward_daily" // 本次分红的行为类型
 	reward.TypeRecordId = locationId
 	reward.Reason = "recommend_vip_top" // 给我分红的理由
 	reward.ReasonLocationId = vip
