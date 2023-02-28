@@ -1569,7 +1569,7 @@ func (uuc *UserUseCase) AdminDailyLocationReward(ctx context.Context, req *v1.Ad
 						tmpMyRecommendAmount = tmpCurrentReward * recommendNineRate / 100
 					} else if 9 == i && myUserTopRecommendUserInfo.HistoryRecommend >= 5 {
 						tmpMyRecommendAmount = tmpCurrentReward * recommendTenRate / 100
-					} else if 10 <= i && i <= 19 && myUserTopRecommendUserInfo.HistoryRecommend >= 6 {
+					} else if 10 <= i && i <= 14 && myUserTopRecommendUserInfo.HistoryRecommend >= 6 {
 						tmpMyRecommendAmount = tmpCurrentReward * recommendElevenTwentyRate / 100
 					}
 
