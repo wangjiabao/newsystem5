@@ -122,10 +122,10 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 
 	// 每次一共最多查2000条，所以注意好外层调用的定时查询的时间设置，当然都可以重新定义，
 	// 在功能上调用者查询两种币的交易记录，每次都要把数据覆盖查询，是一个较大范围的查找防止遗漏数据，范围最起码要大于实际这段时间的入单量，不能边界查询容易掉单，这样的实现是因为简单
-	for i := 1; i <= 1; i++ {
+	for i := 1; i <= 20; i++ {
 
 		//depositUsdtResult, err = requestEthDepositResult(200, int64(i), "0x55d398326f99059fF775485246999027B3197955")
-		depositUsdtResult, err = requestEthDepositResult(2, int64(i), "0x337610d27c682E347C9cD60BD4b3b107C9d34dDd")
+		depositUsdtResult, err = requestEthDepositResult(200, int64(i), "0x55d398326f99059fF775485246999027B3197955")
 		if nil != err {
 			break
 		}
@@ -265,7 +265,7 @@ func requestEthDepositResult(offset int64, page int64, contractAddress string) (
 	data.Set("action", "tokentx")
 	data.Set("contractaddress", contractAddress)
 	data.Set("apikey", "CRCSHR2G3WXB1MET3BNA7ZQKQVSNXFYX18")
-	data.Set("address", "")
+	data.Set("address", "0x032b518716a92a9d44fe24393136b00712572aa8")
 	data.Set("sort", "desc")
 	data.Set("offset", strconv.FormatInt(offset, 10))
 	data.Set("page", strconv.FormatInt(page, 10))
@@ -307,7 +307,7 @@ func requestEthDepositResult(offset int64, page int64, contractAddress string) (
 
 	res := make(map[string]*eth, 0)
 	for _, v := range i.Result {
-		if "" == v.To { // 接收者
+		if "0x032b518716a92a9d44fe24393136b00712572aa8" == v.To { // 接收者
 			res[v.Hash] = v
 		}
 	}
