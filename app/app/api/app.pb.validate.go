@@ -8826,7 +8826,7 @@ func (m *AdminDailyRecommendRewardRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for Day
+	// no validation rules for Date
 
 	if len(errors) > 0 {
 		return AdminDailyRecommendRewardRequestMultiError(errors)
@@ -9035,7 +9035,7 @@ func (m *AdminDailyBalanceRewardRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for Day
+	// no validation rules for Date
 
 	if len(errors) > 0 {
 		return AdminDailyBalanceRewardRequestMultiError(errors)
@@ -9942,7 +9942,7 @@ func (m *AdminDailyLocationRewardRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for Day
+	// no validation rules for Date
 
 	if len(errors) > 0 {
 		return AdminDailyLocationRewardRequestMultiError(errors)

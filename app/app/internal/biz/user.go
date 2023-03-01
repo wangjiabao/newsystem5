@@ -204,7 +204,7 @@ type UserBalanceRepo interface {
 
 	UpdateWithdrawPass(ctx context.Context, id int64) (*Withdraw, error)
 	UserDailyBalanceReward(ctx context.Context, userId int64, amount int64, amountDhb int64, status string) (int64, error)
-	GetBalanceRewardCurrent(ctx context.Context) ([]*BalanceReward, error)
+	GetBalanceRewardCurrent(ctx context.Context, now time.Time) ([]*BalanceReward, error)
 	UserDailyLocationReward(ctx context.Context, userId int64, amount int64, coinAmount int64, status string, locationId int64) (int64, error)
 	DepositLastNew(ctx context.Context, userId int64, lastAmount int64, lastCoinAmount int64, locations []*LocationNew) (int64, error)
 	UpdateBalanceRewardLastRewardDate(ctx context.Context, id int64) error
@@ -1485,13 +1485,24 @@ func (uuc *UserUseCase) AdminDailyBalanceReward(ctx context.Context, req *v1.Adm
 		}
 	}
 
-	balanceRewards, err = uuc.ubRepo.GetBalanceRewardCurrent(ctx)
+	now := time.Now()
+	if "" != req.Date { // 测试条件
+		now, err = time.Parse("2006-01-02 15:04:05", req.Date) // 时间进行格式校验
+		if nil != err {
+			return nil, err
+		}
+	}
+
+	now = now.UTC()
+	balanceRewards, err = uuc.ubRepo.GetBalanceRewardCurrent(ctx, now)
 
 	timeLimit := time.Now().UTC().Add(-23 * time.Hour)
 
 	for _, vBalanceRewards := range balanceRewards {
-		if vBalanceRewards.LastRewardDate.After(timeLimit) {
-			continue
+		if "" == req.Date { // 测试条件
+			if vBalanceRewards.LastRewardDate.After(timeLimit) {
+				continue
+			}
 		}
 
 		// 今天发
@@ -1786,7 +1797,7 @@ func (uuc *UserUseCase) AdminDailyRecommendReward(ctx context.Context, req *v1.A
 		err                    error
 	)
 
-	if 1 == req.Day {
+	if "" == req.Date {
 		day = 0
 	}
 

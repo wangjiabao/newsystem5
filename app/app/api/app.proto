@@ -794,7 +794,7 @@ message CheckAndInsertRecommendAreaReply {
 }
 
 message AdminDailyRecommendRewardRequest {
-	int32 day = 1;
+	string date = 1;
 }
 
 message AdminDailyRecommendRewardReply {
@@ -802,7 +802,7 @@ message AdminDailyRecommendRewardReply {
 }
 
 message AdminDailyBalanceRewardRequest {
-	int32 day = 1;
+	string date = 1;
 }
 
 message AdminDailyBalanceRewardReply {
@@ -849,7 +849,7 @@ message AdminCreateAccountReply {
 }
 
 message AdminDailyLocationRewardRequest {
-	int32 day = 1;
+	string date = 1;
 }
 
 message AdminDailyLocationRewardReply {

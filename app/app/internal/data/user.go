@@ -2362,11 +2362,9 @@ func (ub *UserBalanceRepo) GetUserRewardByUserId(ctx context.Context, userId int
 }
 
 // GetBalanceRewardCurrent .
-func (ub *UserBalanceRepo) GetBalanceRewardCurrent(ctx context.Context) ([]*biz.BalanceReward, error) {
+func (ub *UserBalanceRepo) GetBalanceRewardCurrent(ctx context.Context, now time.Time) ([]*biz.BalanceReward, error) {
 	var balanceRewards []*BalanceReward
 	res := make([]*biz.BalanceReward, 0)
-
-	now := time.Now().UTC()
 
 	if err := ub.data.db.
 		Where("h=? and m<=? and m>=?", now.Hour(), now.Minute(), now.Minute()-5).
