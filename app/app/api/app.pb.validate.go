@@ -8826,7 +8826,7 @@ func (m *AdminDailyRecommendRewardRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for Date
+	// no validation rules for Day
 
 	if len(errors) > 0 {
 		return AdminDailyRecommendRewardRequestMultiError(errors)

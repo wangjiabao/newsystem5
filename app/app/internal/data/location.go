@@ -109,18 +109,12 @@ func (lr *LocationRepo) GetLocationDailyYesterday(ctx context.Context, day int) 
 	res := make([]*biz.LocationNew, 0)
 	instance := lr.data.db.Table("location_new")
 
+	// 16点之后执行
 	now := time.Now().UTC().AddDate(0, 0, day)
-	var startDate time.Time
-	var endDate time.Time
-	if 14 <= now.Hour() {
-		startDate = now
-		endDate = now.AddDate(0, 0, 1)
-	} else {
-		startDate = now.AddDate(0, 0, -1)
-		endDate = now
-	}
-	todayStart := time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 14, 0, 0, 0, time.UTC)
-	todayEnd := time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 14, 0, 0, 0, time.UTC)
+	startDate := now
+	endDate := now.AddDate(0, 0, 1)
+	todayStart := time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 16, 0, 0, 0, time.UTC)
+	todayEnd := time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 16, 0, 0, 0, time.UTC)
 
 	instance = instance.Where("created_at>=?", todayStart)
 	instance = instance.Where("created_at<?", todayEnd)

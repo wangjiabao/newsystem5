@@ -1797,7 +1797,7 @@ func (uuc *UserUseCase) AdminDailyRecommendReward(ctx context.Context, req *v1.A
 		err                    error
 	)
 
-	if "" == req.Date {
+	if 1 == req.Day {
 		day = 0
 	}
 

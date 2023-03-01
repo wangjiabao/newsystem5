@@ -363,10 +363,11 @@ paths:
                 - App
             operationId: App_AdminDailyRecommendReward
             parameters:
-                - name: date
+                - name: day
                   in: query
                   schema:
-                    type: string
+                    type: integer
+                    format: int64
             responses:
                 "200":
                     description: OK

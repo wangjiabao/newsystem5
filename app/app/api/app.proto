@@ -794,7 +794,7 @@ message CheckAndInsertRecommendAreaReply {
 }
 
 message AdminDailyRecommendRewardRequest {
-	string date = 1;
+	int64 day = 1;
 }
 
 message AdminDailyRecommendRewardReply {
