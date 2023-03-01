@@ -1574,13 +1574,28 @@ func (uuc *UserUseCase) AdminDailyLocationReward(ctx context.Context, req *v1.Ad
 		recommendNineRate         int64
 		recommendTenRate          int64
 		recommendElevenTwentyRate int64
+		recommendOneNum           = int64(1)
+		recommendTwoNum           = int64(2)
+		recommendThreeNum         = int64(3)
+		recommendFourNum          = int64(4)
+		recommendFiveNum          = int64(4)
+		recommendSixNum           = int64(4)
+		recommendSevenNum         = int64(5)
+		recommendEightNum         = int64(5)
+		recommendNineNum          = int64(5)
+		recommendTenNum           = int64(5)
+		recommendElevenTwentyNum  = int64(6)
 		err                       error
 	)
 
 	configs, _ = uuc.configRepo.GetConfigByKeys(ctx,
 		"location_reward_rate", "coin_price", "coin_reward_rate", "reward_rate",
-		"recommend_one_rate", "recommend_two_rate", "recommend_three_rate", "recommend_four_rate", "recommend_five_rate", "recommend_six_rate",
-		"recommend_seven_rate", "recommend_eight_rate", "recommend_nine_rate", "recommend_ten_rate", "recommend_eleven_twenty_rate",
+		"recommend_one_rate", "recommend_two_rate", "recommend_three_rate", "recommend_four_rate",
+		"recommend_five_rate", "recommend_six_rate",
+		"recommend_seven_rate", "recommend_eight_rate", "recommend_nine_rate", "recommend_ten_rate",
+		"recommend_eleven_twenty_rate", "recommend_one_num", "recommend_two_num",
+		"recommend_three_num", "recommend_four_num", "recommend_five_num", "recommend_six_num", "recommend_seven_num",
+		"recommend_eight_num", "recommend_nine_num", "recommend_ten_num", "recommend_eleven_twenty_num",
 	)
 	if nil != configs {
 		for _, vConfig := range configs {
@@ -1614,6 +1629,28 @@ func (uuc *UserUseCase) AdminDailyLocationReward(ctx context.Context, req *v1.Ad
 				recommendTenRate, _ = strconv.ParseInt(vConfig.Value, 10, 64)
 			} else if "recommend_eleven_twenty_rate" == vConfig.KeyName {
 				recommendElevenTwentyRate, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "recommend_one_num" == vConfig.KeyName {
+				recommendOneNum, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "recommend_two_num" == vConfig.KeyName {
+				recommendTwoNum, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "recommend_three_num" == vConfig.KeyName {
+				recommendThreeNum, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "recommend_four_num" == vConfig.KeyName {
+				recommendFourNum, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "recommend_five_num" == vConfig.KeyName {
+				recommendFiveNum, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "recommend_six_num" == vConfig.KeyName {
+				recommendSixNum, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "recommend_seven_num" == vConfig.KeyName {
+				recommendSevenNum, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "recommend_eight_num" == vConfig.KeyName {
+				recommendEightNum, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "recommend_nine_num" == vConfig.KeyName {
+				recommendNineNum, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "recommend_ten_num" == vConfig.KeyName {
+				recommendTenNum, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "recommend_eleven_twenty_num" == vConfig.KeyName {
+				recommendElevenTwentyNum, _ = strconv.ParseInt(vConfig.Value, 10, 64)
 			}
 		}
 	}
@@ -1657,27 +1694,27 @@ func (uuc *UserUseCase) AdminDailyLocationReward(ctx context.Context, req *v1.Ad
 					}
 
 					var tmpMyRecommendAmount int64
-					if 0 == i && myUserTopRecommendUserInfo.HistoryRecommend >= 1 { // 当前用户被此人直推
+					if 0 == i && myUserTopRecommendUserInfo.HistoryRecommend >= recommendOneNum { // 当前用户被此人直推
 						tmpMyRecommendAmount = tmpCurrentReward * recommendOneRate / 100
-					} else if 1 == i && myUserTopRecommendUserInfo.HistoryRecommend >= 2 {
+					} else if 1 == i && myUserTopRecommendUserInfo.HistoryRecommend >= recommendTwoNum {
 						tmpMyRecommendAmount = tmpCurrentReward * recommendTwoRate / 100
-					} else if 2 == i && myUserTopRecommendUserInfo.HistoryRecommend >= 3 {
+					} else if 2 == i && myUserTopRecommendUserInfo.HistoryRecommend >= recommendThreeNum {
 						tmpMyRecommendAmount = tmpCurrentReward * recommendThreeRate / 100
-					} else if 3 == i && myUserTopRecommendUserInfo.HistoryRecommend >= 4 {
+					} else if 3 == i && myUserTopRecommendUserInfo.HistoryRecommend >= recommendFourNum {
 						tmpMyRecommendAmount = tmpCurrentReward * recommendFourRate / 100
-					} else if 4 == i && myUserTopRecommendUserInfo.HistoryRecommend >= 4 {
+					} else if 4 == i && myUserTopRecommendUserInfo.HistoryRecommend >= recommendFiveNum {
 						tmpMyRecommendAmount = tmpCurrentReward * recommendFiveRate / 100
-					} else if 5 == i && myUserTopRecommendUserInfo.HistoryRecommend >= 4 {
+					} else if 5 == i && myUserTopRecommendUserInfo.HistoryRecommend >= recommendSixNum {
 						tmpMyRecommendAmount = tmpCurrentReward * recommendSixRate / 100
-					} else if 6 == i && myUserTopRecommendUserInfo.HistoryRecommend >= 5 {
+					} else if 6 == i && myUserTopRecommendUserInfo.HistoryRecommend >= recommendSevenNum {
 						tmpMyRecommendAmount = tmpCurrentReward * recommendSevenRate / 100
-					} else if 7 == i && myUserTopRecommendUserInfo.HistoryRecommend >= 5 {
+					} else if 7 == i && myUserTopRecommendUserInfo.HistoryRecommend >= recommendEightNum {
 						tmpMyRecommendAmount = tmpCurrentReward * recommendEightRate / 100
-					} else if 8 == i && myUserTopRecommendUserInfo.HistoryRecommend >= 5 {
+					} else if 8 == i && myUserTopRecommendUserInfo.HistoryRecommend >= recommendNineNum {
 						tmpMyRecommendAmount = tmpCurrentReward * recommendNineRate / 100
-					} else if 9 == i && myUserTopRecommendUserInfo.HistoryRecommend >= 5 {
+					} else if 9 == i && myUserTopRecommendUserInfo.HistoryRecommend >= recommendTenNum {
 						tmpMyRecommendAmount = tmpCurrentReward * recommendTenRate / 100
-					} else if 10 <= i && i <= 14 && myUserTopRecommendUserInfo.HistoryRecommend >= 6 {
+					} else if 10 <= i && i <= 14 && myUserTopRecommendUserInfo.HistoryRecommend >= recommendElevenTwentyNum {
 						tmpMyRecommendAmount = tmpCurrentReward * recommendElevenTwentyRate / 100
 					}
 
