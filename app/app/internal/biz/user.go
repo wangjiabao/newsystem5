@@ -1394,7 +1394,6 @@ func (uuc *UserUseCase) AdminWithdraw(ctx context.Context, req *v1.AdminWithdraw
 	//time.Sleep(30 * time.Second) // 错开时间和充值
 	var (
 		currentValue    int64
-		myLocationLast  *Location
 		withdrawNotDeal []*Withdraw
 		configs         []*Config
 		withdrawRate    int64
@@ -1441,7 +1440,7 @@ func (uuc *UserUseCase) AdminWithdraw(ctx context.Context, req *v1.AdminWithdraw
 			currentValue -= withdraw.Amount * withdrawRate / 100 // 手续费
 			fmt.Println(withdraw.Amount, currentValue)
 			// 手续费记录
-			err = uuc.ubRepo.SystemFee(ctx, withdraw.Amount*withdrawRate/100, myLocationLast.ID)
+			err = uuc.ubRepo.SystemFee(ctx, withdraw.Amount*withdrawRate/100, withdraw.ID)
 			if nil != err {
 				return err
 			}
