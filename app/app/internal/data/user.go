@@ -413,15 +413,15 @@ func (u *UserRepo) GetUserCountToday(ctx context.Context) (int64, error) {
 	now := time.Now().UTC()
 	var startDate time.Time
 	var endDate time.Time
-	if 14 <= now.Hour() {
+	if 16 <= now.Hour() {
 		startDate = now
 		endDate = now.AddDate(0, 0, 1)
 	} else {
 		startDate = now.AddDate(0, 0, -1)
 		endDate = now
 	}
-	todayStart := time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 14, 0, 0, 0, time.UTC)
-	todayEnd := time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 14, 0, 0, 0, time.UTC)
+	todayStart := time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 16, 0, 0, 0, time.UTC)
+	todayEnd := time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 16, 0, 0, 0, time.UTC)
 
 	if err := u.data.db.Table("user").
 		Where("created_at>=?", todayStart).Where("created_at<?", todayEnd).Count(&count).Error; err != nil {
@@ -1799,15 +1799,15 @@ func (ub *UserBalanceRepo) GetSystemYesterdayDailyReward(ctx context.Context, da
 	now := time.Now().UTC().AddDate(0, 0, day)
 	var startDate time.Time
 	var endDate time.Time
-	if 14 <= now.Hour() {
+	if 16 <= now.Hour() {
 		startDate = now
 		endDate = now.AddDate(0, 0, 1)
 	} else {
 		startDate = now.AddDate(0, 0, -1)
 		endDate = now
 	}
-	todayStart := time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 14, 0, 0, 0, time.UTC)
-	todayEnd := time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 14, 0, 0, 0, time.UTC)
+	todayStart := time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 16, 0, 0, 0, time.UTC)
+	todayEnd := time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 16, 0, 0, 0, time.UTC)
 
 	if err := ub.data.db.
 		Where("user_id=?", 999999999).
@@ -2437,15 +2437,15 @@ func (ub *UserBalanceRepo) GetUserRewardRecommendSort(ctx context.Context) ([]*b
 	now := time.Now().UTC().AddDate(0, 0, -1)
 	var startDate time.Time
 	var endDate time.Time
-	if 14 <= now.Hour() {
+	if 16 <= now.Hour() {
 		startDate = now
 		endDate = now.AddDate(0, 0, 1)
 	} else {
 		startDate = now.AddDate(0, 0, -1)
 		endDate = now
 	}
-	todayStart := time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 14, 0, 0, 0, time.UTC)
-	todayEnd := time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 14, 0, 0, 0, time.UTC)
+	todayStart := time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 16, 0, 0, 0, time.UTC)
+	todayEnd := time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 16, 0, 0, 0, time.UTC)
 
 	if err := ub.data.db.Table("reward").
 		Where("type=?", "location").
@@ -2606,15 +2606,15 @@ func (ub UserBalanceRepo) GetUserBalanceRecordUsdtTotalToday(ctx context.Context
 	now := time.Now().UTC()
 	var startDate time.Time
 	var endDate time.Time
-	if 14 <= now.Hour() {
+	if 16 <= now.Hour() {
 		startDate = now
 		endDate = now.AddDate(0, 0, 1)
 	} else {
 		startDate = now.AddDate(0, 0, -1)
 		endDate = now
 	}
-	todayStart := time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 14, 0, 0, 0, time.UTC)
-	todayEnd := time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 14, 0, 0, 0, time.UTC)
+	todayStart := time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 16, 0, 0, 0, time.UTC)
+	todayEnd := time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 16, 0, 0, 0, time.UTC)
 
 	if err := ub.data.db.Table("user_balance_record").
 		Where("type=?", "deposit").
@@ -2637,15 +2637,15 @@ func (ub UserBalanceRepo) GetUserWithdrawUsdtTotalToday(ctx context.Context) (in
 	now := time.Now().UTC()
 	var startDate time.Time
 	var endDate time.Time
-	if 14 <= now.Hour() {
+	if 16 <= now.Hour() {
 		startDate = now
 		endDate = now.AddDate(0, 0, 1)
 	} else {
 		startDate = now.AddDate(0, 0, -1)
 		endDate = now
 	}
-	todayStart := time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 14, 0, 0, 0, time.UTC)
-	todayEnd := time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 14, 0, 0, 0, time.UTC)
+	todayStart := time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 16, 0, 0, 0, time.UTC)
+	todayEnd := time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 16, 0, 0, 0, time.UTC)
 
 	if err := ub.data.db.Table("user_balance_record").
 		Where("type=?", "withdraw").
