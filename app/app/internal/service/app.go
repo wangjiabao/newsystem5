@@ -550,6 +550,10 @@ func (a *AppService) AdminDailyRecommendReward(ctx context.Context, req *v1.Admi
 	return a.uuc.AdminDailyRecommendReward(ctx, req)
 }
 
+func (a *AppService) AdminDailyBalanceReward(ctx context.Context, req *v1.AdminDailyBalanceRewardRequest) (*v1.AdminDailyBalanceRewardReply, error) {
+	return a.uuc.AdminDailyBalanceReward(ctx, req)
+}
+
 func (a *AppService) AdminWithdrawEth(ctx context.Context, req *v1.AdminWithdrawEthRequest) (*v1.AdminWithdrawEthReply, error) {
 	var (
 		withdraw     *biz.Withdraw

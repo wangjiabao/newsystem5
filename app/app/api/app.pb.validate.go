@@ -9013,6 +9013,214 @@ var _ interface {
 	ErrorName() string
 } = AdminDailyRecommendRewardReplyValidationError{}
 
+// Validate checks the field values on AdminDailyBalanceRewardRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *AdminDailyBalanceRewardRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on AdminDailyBalanceRewardRequest with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the result is a list of violation errors wrapped in
+// AdminDailyBalanceRewardRequestMultiError, or nil if none found.
+func (m *AdminDailyBalanceRewardRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *AdminDailyBalanceRewardRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Day
+
+	if len(errors) > 0 {
+		return AdminDailyBalanceRewardRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// AdminDailyBalanceRewardRequestMultiError is an error wrapping multiple
+// validation errors returned by AdminDailyBalanceRewardRequest.ValidateAll()
+// if the designated constraints aren't met.
+type AdminDailyBalanceRewardRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m AdminDailyBalanceRewardRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m AdminDailyBalanceRewardRequestMultiError) AllErrors() []error { return m }
+
+// AdminDailyBalanceRewardRequestValidationError is the validation error
+// returned by AdminDailyBalanceRewardRequest.Validate if the designated
+// constraints aren't met.
+type AdminDailyBalanceRewardRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e AdminDailyBalanceRewardRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e AdminDailyBalanceRewardRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e AdminDailyBalanceRewardRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e AdminDailyBalanceRewardRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e AdminDailyBalanceRewardRequestValidationError) ErrorName() string {
+	return "AdminDailyBalanceRewardRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e AdminDailyBalanceRewardRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sAdminDailyBalanceRewardRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = AdminDailyBalanceRewardRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = AdminDailyBalanceRewardRequestValidationError{}
+
+// Validate checks the field values on AdminDailyBalanceRewardReply with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *AdminDailyBalanceRewardReply) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on AdminDailyBalanceRewardReply with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// AdminDailyBalanceRewardReplyMultiError, or nil if none found.
+func (m *AdminDailyBalanceRewardReply) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *AdminDailyBalanceRewardReply) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return AdminDailyBalanceRewardReplyMultiError(errors)
+	}
+
+	return nil
+}
+
+// AdminDailyBalanceRewardReplyMultiError is an error wrapping multiple
+// validation errors returned by AdminDailyBalanceRewardReply.ValidateAll() if
+// the designated constraints aren't met.
+type AdminDailyBalanceRewardReplyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m AdminDailyBalanceRewardReplyMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m AdminDailyBalanceRewardReplyMultiError) AllErrors() []error { return m }
+
+// AdminDailyBalanceRewardReplyValidationError is the validation error returned
+// by AdminDailyBalanceRewardReply.Validate if the designated constraints
+// aren't met.
+type AdminDailyBalanceRewardReplyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e AdminDailyBalanceRewardReplyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e AdminDailyBalanceRewardReplyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e AdminDailyBalanceRewardReplyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e AdminDailyBalanceRewardReplyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e AdminDailyBalanceRewardReplyValidationError) ErrorName() string {
+	return "AdminDailyBalanceRewardReplyValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e AdminDailyBalanceRewardReplyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sAdminDailyBalanceRewardReply.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = AdminDailyBalanceRewardReplyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = AdminDailyBalanceRewardReplyValidationError{}
+
 // Validate checks the field values on AdminLoginRequest with the rules defined
 // in the proto definition for this message. If any rules are violated, the
 // first error encountered is returned, or nil if there are no violations.

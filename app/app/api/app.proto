@@ -134,12 +134,6 @@ service App {
 		};
 	};
 
-	rpc AdminDailyLocationReward (AdminDailyLocationRewardRequest) returns (AdminDailyLocationRewardReply) {
-		option (google.api.http) = {
-			get: "/api/admin_dhb/daily_location_reward"
-		};
-	};
-
 	rpc AdminDailyFee (AdminDailyFeeRequest) returns (AdminDailyFeeReply) {
 		option (google.api.http) = {
 			get: "/api/admin_dhb/daily_fee"
@@ -280,6 +274,18 @@ service App {
 	rpc AdminDailyRecommendReward (AdminDailyRecommendRewardRequest) returns (AdminDailyRecommendRewardReply) {
 		option (google.api.http) = {
 			get: "/api/admin_dhb/daily_recommend_reward"
+		};
+	};
+
+	rpc AdminDailyBalanceReward (AdminDailyBalanceRewardRequest) returns (AdminDailyBalanceRewardReply) {
+		option (google.api.http) = {
+			get: "/api/admin_dhb/daily_balance_reward"
+		};
+	};
+
+	rpc AdminDailyLocationReward (AdminDailyLocationRewardRequest) returns (AdminDailyLocationRewardReply) {
+		option (google.api.http) = {
+			get: "/api/admin_dhb/daily_location_reward"
 		};
 	};
 }
@@ -792,6 +798,14 @@ message AdminDailyRecommendRewardRequest {
 }
 
 message AdminDailyRecommendRewardReply {
+
+}
+
+message AdminDailyBalanceRewardRequest {
+	int32 day = 1;
+}
+
+message AdminDailyBalanceRewardReply {
 
 }
 

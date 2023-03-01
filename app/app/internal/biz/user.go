@@ -61,6 +61,17 @@ type UserRecommend struct {
 	CreatedAt     time.Time
 }
 
+type BalanceReward struct {
+	ID             int64
+	UserId         int64
+	Status         int64
+	Amount         int64
+	SetDate        time.Time
+	LastRewardDate time.Time
+	UpdatedAt      time.Time
+	CreatedAt      time.Time
+}
+
 type UserCurrentMonthRecommend struct {
 	ID              int64
 	UserId          int64
@@ -147,7 +158,7 @@ type UserBalanceRepo interface {
 	LocationReward(ctx context.Context, userId int64, amount int64, locationId int64, myLocationId int64, locationType string, status string) (int64, error)
 	WithdrawReward(ctx context.Context, userId int64, amount int64, locationId int64, myLocationId int64, locationType string, status string) (int64, error)
 	RecommendReward(ctx context.Context, userId int64, amount int64, locationId int64, status string) (int64, error)
-	RecommendTeamReward(ctx context.Context, userId int64, amount int64, amountDhb int64, locationId int64, vip int64, status string) (int64, error)
+	RecommendTeamReward(ctx context.Context, userId int64, amount int64, amountDhb int64, locationId int64, recommendNum int64, status string) (int64, error)
 	SystemWithdrawReward(ctx context.Context, amount int64, locationId int64) error
 	SystemReward(ctx context.Context, amount int64, locationId int64) error
 	SystemDailyReward(ctx context.Context, amount int64, locationId int64) error
@@ -192,8 +203,11 @@ type UserBalanceRepo interface {
 	UpdateBalance(ctx context.Context, userId int64, amount int64) (bool, error)
 
 	UpdateWithdrawPass(ctx context.Context, id int64) (*Withdraw, error)
+	UserDailyBalanceReward(ctx context.Context, userId int64, amount int64, amountDhb int64, status string) (int64, error)
+	GetBalanceRewardCurrent(ctx context.Context) ([]*BalanceReward, error)
 	UserDailyLocationReward(ctx context.Context, userId int64, amount int64, coinAmount int64, status string, locationId int64) (int64, error)
 	DepositLastNew(ctx context.Context, userId int64, lastAmount int64, lastCoinAmount int64, locations []*LocationNew) (int64, error)
+	UpdateBalanceRewardLastRewardDate(ctx context.Context, id int64) error
 }
 
 type UserRecommendRepo interface {
@@ -1446,6 +1460,89 @@ func (uuc *UserUseCase) AdminWithdraw(ctx context.Context, req *v1.AdminWithdraw
 	return &v1.AdminWithdrawReply{}, nil
 }
 
+func (uuc *UserUseCase) AdminDailyBalanceReward(ctx context.Context, req *v1.AdminDailyBalanceRewardRequest) (*v1.AdminDailyBalanceRewardReply, error) {
+	var (
+		balanceRewards    []*BalanceReward
+		configs           []*Config
+		balanceRewardRate int64
+		coinPrice         int64
+		coinRewardRate    int64
+		rewardRate        int64
+		err               error
+	)
+	configs, _ = uuc.configRepo.GetConfigByKeys(ctx, "balance_reward_rate", "coin_price", "coin_reward_rate", "reward_rate")
+	if nil != configs {
+		for _, vConfig := range configs {
+			if "balance_reward_rate" == vConfig.KeyName {
+				balanceRewardRate, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "coin_price" == vConfig.KeyName {
+				coinPrice, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "coin_reward_rate" == vConfig.KeyName {
+				coinRewardRate, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "reward_rate" == vConfig.KeyName {
+				rewardRate, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			}
+		}
+	}
+
+	balanceRewards, err = uuc.ubRepo.GetBalanceRewardCurrent(ctx)
+
+	timeLimit := time.Now().UTC().Add(-23 * time.Hour)
+
+	for _, vBalanceRewards := range balanceRewards {
+		if vBalanceRewards.LastRewardDate.After(timeLimit) {
+			continue
+		}
+
+		// 今天发
+		tmpCurrentReward := vBalanceRewards.Amount * balanceRewardRate / 1000
+		var myLocationLast *LocationNew
+		// 获取当前用户的占位信息，已经有运行中的跳过
+		myLocationLast, err = uuc.locationRepo.GetMyLocationLast(ctx, vBalanceRewards.UserId)
+		if nil == myLocationLast { // 无占位信息
+			continue
+		}
+
+		if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+			tmpCurrentStatus := myLocationLast.Status               // 现在还在运行中
+			tmpBalanceAmount := tmpCurrentReward * rewardRate / 100 // 记录下一次
+			tmpBalanceCoinAmount := tmpCurrentReward * coinRewardRate / 100 * coinPrice / 1000
+			myLocationLast.Status = "running"
+			myLocationLast.Current += tmpBalanceAmount
+			if myLocationLast.Current >= myLocationLast.CurrentMax { // 占位分红人分满停止
+				if "running" == tmpCurrentStatus {
+					myLocationLast.StopDate = time.Now().UTC().Add(8 * time.Hour)
+				}
+				myLocationLast.Status = "stop"
+			}
+
+			if 0 < tmpBalanceAmount {
+				err = uuc.locationRepo.UpdateLocationNew(ctx, myLocationLast.ID, myLocationLast.Status, tmpBalanceAmount, myLocationLast.StopDate, tmpBalanceCoinAmount) // 分红占位数据修改
+				if nil != err {
+					return err
+				}
+
+				_, err = uuc.ubRepo.UserDailyBalanceReward(ctx, vBalanceRewards.UserId, tmpBalanceAmount, tmpBalanceCoinAmount, tmpCurrentStatus)
+				if nil != err {
+					return err
+				}
+
+				err = uuc.ubRepo.UpdateBalanceRewardLastRewardDate(ctx, vBalanceRewards.ID)
+				if nil != err {
+					return err
+				}
+			}
+
+			return nil
+		}); nil != err {
+			continue
+		}
+
+	}
+
+	return &v1.AdminDailyBalanceRewardReply{}, nil
+}
+
 func (uuc *UserUseCase) AdminDailyLocationReward(ctx context.Context, req *v1.AdminDailyLocationRewardRequest) (*v1.AdminDailyLocationRewardReply, error) {
 
 	var (
@@ -1613,7 +1710,7 @@ func (uuc *UserUseCase) AdminDailyLocationReward(ctx context.Context, req *v1.Ad
 									}
 
 									if 0 < tmpBalanceAmount { // 这次还能分红
-										_, err = uuc.ubRepo.RecommendTeamReward(ctx, tmpMyTopUserRecommendUserId, tmpBalanceAmount, tmpMyRecommendAmountCoin, vUserLocations.ID, myUserTopRecommendUserInfo.HistoryRecommend, tmpStatus) // 推荐人奖励
+										_, err = uuc.ubRepo.RecommendTeamReward(ctx, tmpMyTopUserRecommendUserId, tmpBalanceAmount, tmpMyRecommendAmountCoin, vUserLocations.ID, int64(i+1), tmpStatus) // 推荐人奖励
 										if nil != err {
 											return err
 										}

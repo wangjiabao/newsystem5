@@ -287,6 +287,30 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /api/admin_dhb/daily_balance_reward:
+        get:
+            tags:
+                - App
+            operationId: App_AdminDailyBalanceReward
+            parameters:
+                - name: day
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AdminDailyBalanceRewardReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /api/admin_dhb/daily_fee:
         get:
             tags:
@@ -1067,6 +1091,9 @@ components:
                     type: string
                 password:
                     type: string
+        AdminDailyBalanceRewardReply:
+            type: object
+            properties: {}
         AdminDailyFeeReply:
             type: object
             properties: {}

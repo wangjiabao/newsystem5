@@ -41,7 +41,6 @@ type AppClient interface {
 	AdminWithdrawPass(ctx context.Context, in *AdminWithdrawPassRequest, opts ...grpc.CallOption) (*AdminWithdrawPassReply, error)
 	AdminWithdrawEth(ctx context.Context, in *AdminWithdrawEthRequest, opts ...grpc.CallOption) (*AdminWithdrawEthReply, error)
 	AdminFee(ctx context.Context, in *AdminFeeRequest, opts ...grpc.CallOption) (*AdminFeeReply, error)
-	AdminDailyLocationReward(ctx context.Context, in *AdminDailyLocationRewardRequest, opts ...grpc.CallOption) (*AdminDailyLocationRewardReply, error)
 	AdminDailyFee(ctx context.Context, in *AdminDailyFeeRequest, opts ...grpc.CallOption) (*AdminDailyFeeReply, error)
 	AdminAll(ctx context.Context, in *AdminAllRequest, opts ...grpc.CallOption) (*AdminAllReply, error)
 	AdminUserRecommend(ctx context.Context, in *AdminUserRecommendRequest, opts ...grpc.CallOption) (*AdminUserRecommendReply, error)
@@ -64,6 +63,8 @@ type AppClient interface {
 	AuthAdminDelete(ctx context.Context, in *AuthAdminDeleteRequest, opts ...grpc.CallOption) (*AuthAdminDeleteReply, error)
 	CheckAndInsertRecommendArea(ctx context.Context, in *CheckAndInsertRecommendAreaRequest, opts ...grpc.CallOption) (*CheckAndInsertRecommendAreaReply, error)
 	AdminDailyRecommendReward(ctx context.Context, in *AdminDailyRecommendRewardRequest, opts ...grpc.CallOption) (*AdminDailyRecommendRewardReply, error)
+	AdminDailyBalanceReward(ctx context.Context, in *AdminDailyBalanceRewardRequest, opts ...grpc.CallOption) (*AdminDailyBalanceRewardReply, error)
+	AdminDailyLocationReward(ctx context.Context, in *AdminDailyLocationRewardRequest, opts ...grpc.CallOption) (*AdminDailyLocationRewardReply, error)
 }
 
 type appClient struct {
@@ -239,15 +240,6 @@ func (c *appClient) AdminWithdrawEth(ctx context.Context, in *AdminWithdrawEthRe
 func (c *appClient) AdminFee(ctx context.Context, in *AdminFeeRequest, opts ...grpc.CallOption) (*AdminFeeReply, error) {
 	out := new(AdminFeeReply)
 	err := c.cc.Invoke(ctx, "/api.App/AdminFee", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *appClient) AdminDailyLocationReward(ctx context.Context, in *AdminDailyLocationRewardRequest, opts ...grpc.CallOption) (*AdminDailyLocationRewardReply, error) {
-	out := new(AdminDailyLocationRewardReply)
-	err := c.cc.Invoke(ctx, "/api.App/AdminDailyLocationReward", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -452,6 +444,24 @@ func (c *appClient) AdminDailyRecommendReward(ctx context.Context, in *AdminDail
 	return out, nil
 }
 
+func (c *appClient) AdminDailyBalanceReward(ctx context.Context, in *AdminDailyBalanceRewardRequest, opts ...grpc.CallOption) (*AdminDailyBalanceRewardReply, error) {
+	out := new(AdminDailyBalanceRewardReply)
+	err := c.cc.Invoke(ctx, "/api.App/AdminDailyBalanceReward", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appClient) AdminDailyLocationReward(ctx context.Context, in *AdminDailyLocationRewardRequest, opts ...grpc.CallOption) (*AdminDailyLocationRewardReply, error) {
+	out := new(AdminDailyLocationRewardReply)
+	err := c.cc.Invoke(ctx, "/api.App/AdminDailyLocationReward", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AppServer is the server API for App service.
 // All implementations must embed UnimplementedAppServer
 // for forward compatibility
@@ -475,7 +485,6 @@ type AppServer interface {
 	AdminWithdrawPass(context.Context, *AdminWithdrawPassRequest) (*AdminWithdrawPassReply, error)
 	AdminWithdrawEth(context.Context, *AdminWithdrawEthRequest) (*AdminWithdrawEthReply, error)
 	AdminFee(context.Context, *AdminFeeRequest) (*AdminFeeReply, error)
-	AdminDailyLocationReward(context.Context, *AdminDailyLocationRewardRequest) (*AdminDailyLocationRewardReply, error)
 	AdminDailyFee(context.Context, *AdminDailyFeeRequest) (*AdminDailyFeeReply, error)
 	AdminAll(context.Context, *AdminAllRequest) (*AdminAllReply, error)
 	AdminUserRecommend(context.Context, *AdminUserRecommendRequest) (*AdminUserRecommendReply, error)
@@ -498,6 +507,8 @@ type AppServer interface {
 	AuthAdminDelete(context.Context, *AuthAdminDeleteRequest) (*AuthAdminDeleteReply, error)
 	CheckAndInsertRecommendArea(context.Context, *CheckAndInsertRecommendAreaRequest) (*CheckAndInsertRecommendAreaReply, error)
 	AdminDailyRecommendReward(context.Context, *AdminDailyRecommendRewardRequest) (*AdminDailyRecommendRewardReply, error)
+	AdminDailyBalanceReward(context.Context, *AdminDailyBalanceRewardRequest) (*AdminDailyBalanceRewardReply, error)
+	AdminDailyLocationReward(context.Context, *AdminDailyLocationRewardRequest) (*AdminDailyLocationRewardReply, error)
 	mustEmbedUnimplementedAppServer()
 }
 
@@ -561,9 +572,6 @@ func (UnimplementedAppServer) AdminWithdrawEth(context.Context, *AdminWithdrawEt
 }
 func (UnimplementedAppServer) AdminFee(context.Context, *AdminFeeRequest) (*AdminFeeReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AdminFee not implemented")
-}
-func (UnimplementedAppServer) AdminDailyLocationReward(context.Context, *AdminDailyLocationRewardRequest) (*AdminDailyLocationRewardReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AdminDailyLocationReward not implemented")
 }
 func (UnimplementedAppServer) AdminDailyFee(context.Context, *AdminDailyFeeRequest) (*AdminDailyFeeReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AdminDailyFee not implemented")
@@ -630,6 +638,12 @@ func (UnimplementedAppServer) CheckAndInsertRecommendArea(context.Context, *Chec
 }
 func (UnimplementedAppServer) AdminDailyRecommendReward(context.Context, *AdminDailyRecommendRewardRequest) (*AdminDailyRecommendRewardReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AdminDailyRecommendReward not implemented")
+}
+func (UnimplementedAppServer) AdminDailyBalanceReward(context.Context, *AdminDailyBalanceRewardRequest) (*AdminDailyBalanceRewardReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AdminDailyBalanceReward not implemented")
+}
+func (UnimplementedAppServer) AdminDailyLocationReward(context.Context, *AdminDailyLocationRewardRequest) (*AdminDailyLocationRewardReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AdminDailyLocationReward not implemented")
 }
 func (UnimplementedAppServer) mustEmbedUnimplementedAppServer() {}
 
@@ -982,24 +996,6 @@ func _App_AdminFee_Handler(srv interface{}, ctx context.Context, dec func(interf
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AppServer).AdminFee(ctx, req.(*AdminFeeRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _App_AdminDailyLocationReward_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AdminDailyLocationRewardRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AppServer).AdminDailyLocationReward(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/api.App/AdminDailyLocationReward",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AppServer).AdminDailyLocationReward(ctx, req.(*AdminDailyLocationRewardRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1400,6 +1396,42 @@ func _App_AdminDailyRecommendReward_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _App_AdminDailyBalanceReward_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AdminDailyBalanceRewardRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppServer).AdminDailyBalanceReward(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.App/AdminDailyBalanceReward",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppServer).AdminDailyBalanceReward(ctx, req.(*AdminDailyBalanceRewardRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _App_AdminDailyLocationReward_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AdminDailyLocationRewardRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppServer).AdminDailyLocationReward(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.App/AdminDailyLocationReward",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppServer).AdminDailyLocationReward(ctx, req.(*AdminDailyLocationRewardRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // App_ServiceDesc is the grpc.ServiceDesc for App service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1482,10 +1514,6 @@ var App_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AdminFee",
 			Handler:    _App_AdminFee_Handler,
-		},
-		{
-			MethodName: "AdminDailyLocationReward",
-			Handler:    _App_AdminDailyLocationReward_Handler,
 		},
 		{
 			MethodName: "AdminDailyFee",
@@ -1574,6 +1602,14 @@ var App_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AdminDailyRecommendReward",
 			Handler:    _App_AdminDailyRecommendReward_Handler,
+		},
+		{
+			MethodName: "AdminDailyBalanceReward",
+			Handler:    _App_AdminDailyBalanceReward_Handler,
+		},
+		{
+			MethodName: "AdminDailyLocationReward",
+			Handler:    _App_AdminDailyLocationReward_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
