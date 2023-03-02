@@ -355,16 +355,23 @@ func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord
 			}
 
 			// 清算冻结
-			if 0 < locationCurrent && nil != myLastStopLocations {
-				var tmpCurrentAmount int64
-				if locationCurrent > locationCurrentMax {
-					tmpCurrentAmount = locationCurrentMax
-				} else {
-					tmpCurrentAmount = locationCurrent
-				}
-				_, err = ruc.userBalanceRepo.DepositLastNew(ctx, v.UserId, tmpCurrentAmount, stopCoin, myLastStopLocations) // 充值
+			if nil != myLastStopLocations {
+				err = ruc.userBalanceRepo.UpdateLocationAgain(ctx, myLastStopLocations) // 充值
 				if nil != err {
 					return err
+				}
+
+				if 0 < locationCurrent {
+					var tmpCurrentAmount int64
+					if locationCurrent > locationCurrentMax {
+						tmpCurrentAmount = locationCurrentMax
+					} else {
+						tmpCurrentAmount = locationCurrent
+					}
+					_, err = ruc.userBalanceRepo.DepositLastNew(ctx, v.UserId, tmpCurrentAmount, stopCoin) // 充值
+					if nil != err {
+						return err
+					}
 				}
 			}
 
@@ -522,16 +529,22 @@ func (ruc *RecordUseCase) AdminLocationInsert(ctx context.Context, userId int64,
 		}
 
 		// 清算冻结
-		if 0 < locationCurrent && nil != myLastStopLocations {
-			var tmpCurrentAmount int64
-			if locationCurrent > amount*10000000000*outRate {
-				tmpCurrentAmount = amount * 10000000000 * outRate
-			} else {
-				tmpCurrentAmount = locationCurrent
-			}
-			_, err = ruc.userBalanceRepo.DepositLastNew(ctx, userId, tmpCurrentAmount, stopCoin, myLastStopLocations) // 充值
+		if nil != myLastStopLocations {
+			err = ruc.userBalanceRepo.UpdateLocationAgain(ctx, myLastStopLocations) // 充值
 			if nil != err {
 				return err
+			}
+			if 0 < locationCurrent {
+				var tmpCurrentAmount int64
+				if locationCurrent > amount*10000000000*outRate {
+					tmpCurrentAmount = amount * 10000000000 * outRate
+				} else {
+					tmpCurrentAmount = locationCurrent
+				}
+				_, err = ruc.userBalanceRepo.DepositLastNew(ctx, userId, tmpCurrentAmount, stopCoin) // 充值
+				if nil != err {
+					return err
+				}
 			}
 		}
 

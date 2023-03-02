@@ -1159,8 +1159,25 @@ func (ub *UserBalanceRepo) Deposit(ctx context.Context, userId int64, amount int
 	return userBalanceRecode.ID, nil
 }
 
+// UpdateLocationAgain .
+func (ub *UserBalanceRepo) UpdateLocationAgain(ctx context.Context, locations []*biz.LocationNew) error {
+	var (
+		err error
+	)
+	for _, vLocations := range locations {
+		res := ub.data.DB(ctx).Table("location_new").
+			Where("id=?", vLocations.ID).
+			Updates(map[string]interface{}{"stop_location_again": "1"})
+		if 0 == res.RowsAffected || res.Error != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // DepositLastNew .
-func (ub *UserBalanceRepo) DepositLastNew(ctx context.Context, userId int64, lastAmount int64, lastCoinAmount int64, locations []*biz.LocationNew) (int64, error) {
+func (ub *UserBalanceRepo) DepositLastNew(ctx context.Context, userId int64, lastAmount int64, lastCoinAmount int64) (int64, error) {
 	var (
 		err error
 	)
@@ -1195,15 +1212,6 @@ func (ub *UserBalanceRepo) DepositLastNew(ctx context.Context, userId int64, las
 	err = ub.data.DB(ctx).Table("reward").Create(&reward).Error
 	if err != nil {
 		return 0, err
-	}
-
-	for _, vLocations := range locations {
-		res := ub.data.DB(ctx).Table("location_new").
-			Where("id=?", vLocations.ID).
-			Updates(map[string]interface{}{"stop_location_again": "1"})
-		if 0 == res.RowsAffected || res.Error != nil {
-			return 0, err
-		}
 	}
 
 	return userBalanceRecode.ID, nil
