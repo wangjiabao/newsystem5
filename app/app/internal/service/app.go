@@ -156,89 +156,88 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 		//}
 
 		depositUsers, err = a.uuc.GetUserByAddress(ctx, fromAccount...)
-		if nil != err || nil == depositUsers {
-			continue
-		}
-		existEthUserRecords, err = a.ruc.GetEthUserRecordByTxHash(ctx, hashKeys...)
-		// 统计开始
-		notExistDepositResult = make([]*biz.EthUserRecord, 0)
-		for _, vDepositUsdtResult := range depositUsdtResult { // 主查usdt
-			if _, ok := existEthUserRecords[vDepositUsdtResult.Hash]; ok { // 记录已存在
-				continue
-			}
-			if _, ok := depositUsers[vDepositUsdtResult.From]; !ok { // 用户不存在
-				continue
-			}
-			//if _, ok := userDepositDhbResult[vDepositUsdtResult.From]; !ok { // 没有dhb的充值记录
-			//	continue
-			//}
-			//var (
-			//	tmpDhbHash, tmpDhbHashValue string
-			//)
+		if nil != depositUsers {
+			existEthUserRecords, err = a.ruc.GetEthUserRecordByTxHash(ctx, hashKeys...)
+			// 统计开始
+			notExistDepositResult = make([]*biz.EthUserRecord, 0)
+			for _, vDepositUsdtResult := range depositUsdtResult { // 主查usdt
+				if _, ok := existEthUserRecords[vDepositUsdtResult.Hash]; ok { // 记录已存在
+					continue
+				}
+				if _, ok := depositUsers[vDepositUsdtResult.From]; !ok { // 用户不存在
+					continue
+				}
+				//if _, ok := userDepositDhbResult[vDepositUsdtResult.From]; !ok { // 没有dhb的充值记录
+				//	continue
+				//}
+				//var (
+				//	tmpDhbHash, tmpDhbHashValue string
+				//)
 
-			//tmpPass := false
-			//for _, vUserDepositDhbResult := range userDepositDhbResult[vDepositUsdtResult.From] { // 充值数额类型匹配
-			//	if _, ok := existEthUserRecords[vUserDepositDhbResult.Hash]; ok { // 记录已存在
-			//		continue
-			//	}
-			//
-			//	if "10000000000000000" == vDepositUsdtResult.Value {
-			//		tmpPass = true
-			//	} else if "30000000000000000" == vDepositUsdtResult.Value {
-			//		tmpPass = true
-			//	} else if "50000000000000000" == vDepositUsdtResult.Value {
-			//		tmpPass = true
-			//	} else {
-			//		continue
-			//	}
-			//
-			//	tmpDhbHash = vUserDepositDhbResult.Hash
-			//	tmpDhbHashValue = vUserDepositDhbResult.Value
-			//}
-			//if !tmpPass {
-			//	continue
-			//}
+				//tmpPass := false
+				//for _, vUserDepositDhbResult := range userDepositDhbResult[vDepositUsdtResult.From] { // 充值数额类型匹配
+				//	if _, ok := existEthUserRecords[vUserDepositDhbResult.Hash]; ok { // 记录已存在
+				//		continue
+				//	}
+				//
+				//	if "10000000000000000" == vDepositUsdtResult.Value {
+				//		tmpPass = true
+				//	} else if "30000000000000000" == vDepositUsdtResult.Value {
+				//		tmpPass = true
+				//	} else if "50000000000000000" == vDepositUsdtResult.Value {
+				//		tmpPass = true
+				//	} else {
+				//		continue
+				//	}
+				//
+				//	tmpDhbHash = vUserDepositDhbResult.Hash
+				//	tmpDhbHashValue = vUserDepositDhbResult.Value
+				//}
+				//if !tmpPass {
+				//	continue
+				//}
 
-			// 最少百位以上
-			lenValue := len(vDepositUsdtResult.Value)
-			if 18 > lenValue { // 0.1
-				continue
+				// 最少百位以上
+				lenValue := len(vDepositUsdtResult.Value)
+				if 18 > lenValue { // 0.1
+					continue
+				}
+				// 去掉8个尾数0作为系统金额
+				tmpValue, _ := strconv.ParseInt(vDepositUsdtResult.Value[0:lenValue-8], 10, 64)
+				if 0 == tmpValue {
+					continue
+				}
+				//fmt.Println(vDepositUsdtResult.Value, tmpValue)
+				tmpValue = tmpValue * 10 // 4个地址分，精度目前只识别到这里，如果有人
+				//fmt.Println(tmpValue)
+				if int64(10000000000) > tmpValue { // 目前0.1表示
+					continue
+				}
+
+				notExistDepositResult = append(notExistDepositResult, &biz.EthUserRecord{ // 两种币的记录
+					UserId:    depositUsers[vDepositUsdtResult.From].ID,
+					Hash:      vDepositUsdtResult.Hash,
+					Status:    "success",
+					Type:      "deposit",
+					Amount:    strconv.FormatInt(tmpValue, 10) + "00000000",
+					RelAmount: tmpValue * 100, // todo 改目前放大100倍率
+					CoinType:  "USDT",
+				})
+
+				//&biz.EthUserRecord{
+				//	UserId:   depositUsers[vDepositUsdtResult.From].ID,
+				//	Hash:     tmpDhbHash,
+				//	Status:   "success",
+				//	Type:     "deposit",
+				//	Amount:   tmpDhbHashValue,
+				//	CoinType: "DHB",
+				//}
 			}
-			// 去掉8个尾数0作为系统金额
-			tmpValue, _ := strconv.ParseInt(vDepositUsdtResult.Value[0:lenValue-8], 10, 64)
-			if 0 == tmpValue {
-				continue
+
+			_, err = a.ruc.EthUserRecordHandle(ctx, notExistDepositResult...)
+			if nil != err {
+				fmt.Println(err)
 			}
-			//fmt.Println(vDepositUsdtResult.Value, tmpValue)
-			tmpValue = tmpValue * 10 // 4个地址分，精度目前只识别到这里，如果有人
-			//fmt.Println(tmpValue)
-			if int64(10000000000) > tmpValue { // 目前0.1表示
-				continue
-			}
-
-			notExistDepositResult = append(notExistDepositResult, &biz.EthUserRecord{ // 两种币的记录
-				UserId:    depositUsers[vDepositUsdtResult.From].ID,
-				Hash:      vDepositUsdtResult.Hash,
-				Status:    "success",
-				Type:      "deposit",
-				Amount:    strconv.FormatInt(tmpValue, 10) + "00000000",
-				RelAmount: tmpValue * 100, // todo 改目前放大100倍率
-				CoinType:  "USDT",
-			})
-
-			//&biz.EthUserRecord{
-			//	UserId:   depositUsers[vDepositUsdtResult.From].ID,
-			//	Hash:     tmpDhbHash,
-			//	Status:   "success",
-			//	Type:     "deposit",
-			//	Amount:   tmpDhbHashValue,
-			//	CoinType: "DHB",
-			//}
-		}
-
-		_, err = a.ruc.EthUserRecordHandle(ctx, notExistDepositResult...)
-		if nil != err {
-			fmt.Println(err)
 		}
 
 		//time.Sleep(2 * time.Second)
