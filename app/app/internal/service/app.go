@@ -100,6 +100,7 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 		//level1Dhb             string
 		//level2Dhb             string
 		//level3Dhb             string
+		globalLock *biz.GlobalLock
 	)
 
 	// 配置
@@ -123,6 +124,12 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 	// 每次一共最多查2000条，所以注意好外层调用的定时查询的时间设置，当然都可以重新定义，
 	// 在功能上调用者查询两种币的交易记录，每次都要把数据覆盖查询，是一个较大范围的查找防止遗漏数据，范围最起码要大于实际这段时间的入单量，不能边界查询容易掉单，这样的实现是因为简单
 	for i := 1; i <= 10; i++ {
+
+		// 获取系统锁
+		globalLock, err = a.ruc.GetGlobalLock(ctx)
+		if 1 != globalLock.Status {
+			break
+		}
 
 		//depositUsdtResult, err = requestEthDepositResult(200, int64(i), "0x55d398326f99059fF775485246999027B3197955")
 		depositUsdtResult, err = requestEthDepositResult(200, int64(i), "0x55d398326f99059fF775485246999027B3197955")
@@ -555,6 +562,10 @@ func (a *AppService) AdminDailyBalanceReward(ctx context.Context, req *v1.AdminD
 	return a.uuc.AdminDailyBalanceReward(ctx, req)
 }
 
+func (a *AppService) LockSystem(ctx context.Context, req *v1.LockSystemRequest) (*v1.LockSystemReply, error) {
+	return a.ruc.LockSystem(ctx, req)
+}
+
 func (a *AppService) AdminWithdrawEth(ctx context.Context, req *v1.AdminWithdrawEthRequest) (*v1.AdminWithdrawEthReply, error) {
 	var (
 		withdraw     *biz.Withdraw
@@ -562,10 +573,15 @@ func (a *AppService) AdminWithdrawEth(ctx context.Context, req *v1.AdminWithdraw
 		userIdsMap   map[int64]int64
 		users        map[int64]*biz.User
 		tokenAddress string
+		globalLock   *biz.GlobalLock
 		err          error
 	)
 
 	for {
+		globalLock, err = a.ruc.GetGlobalLock(ctx)
+		if 1 != globalLock.Status {
+			break
+		}
 
 		withdraw, err = a.uuc.GetWithdrawPassOrRewardedFirst(ctx)
 		if nil == withdraw {

@@ -31,6 +31,7 @@ type AppClient interface {
 	Withdraw(ctx context.Context, in *WithdrawRequest, opts ...grpc.CallOption) (*WithdrawReply, error)
 	Deposit(ctx context.Context, in *DepositRequest, opts ...grpc.CallOption) (*DepositReply, error)
 	AdminRewardList(ctx context.Context, in *AdminRewardListRequest, opts ...grpc.CallOption) (*AdminRewardListReply, error)
+	LockSystem(ctx context.Context, in *LockSystemRequest, opts ...grpc.CallOption) (*LockSystemReply, error)
 	AdminUserList(ctx context.Context, in *AdminUserListRequest, opts ...grpc.CallOption) (*AdminUserListReply, error)
 	CheckAdminUserArea(ctx context.Context, in *CheckAdminUserAreaRequest, opts ...grpc.CallOption) (*CheckAdminUserAreaReply, error)
 	CheckAndInsertLocationsRecommendUser(ctx context.Context, in *CheckAndInsertLocationsRecommendUserRequest, opts ...grpc.CallOption) (*CheckAndInsertLocationsRecommendUserReply, error)
@@ -150,6 +151,15 @@ func (c *appClient) Deposit(ctx context.Context, in *DepositRequest, opts ...grp
 func (c *appClient) AdminRewardList(ctx context.Context, in *AdminRewardListRequest, opts ...grpc.CallOption) (*AdminRewardListReply, error) {
 	out := new(AdminRewardListReply)
 	err := c.cc.Invoke(ctx, "/api.App/AdminRewardList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appClient) LockSystem(ctx context.Context, in *LockSystemRequest, opts ...grpc.CallOption) (*LockSystemReply, error) {
+	out := new(LockSystemReply)
+	err := c.cc.Invoke(ctx, "/api.App/LockSystem", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -475,6 +485,7 @@ type AppServer interface {
 	Withdraw(context.Context, *WithdrawRequest) (*WithdrawReply, error)
 	Deposit(context.Context, *DepositRequest) (*DepositReply, error)
 	AdminRewardList(context.Context, *AdminRewardListRequest) (*AdminRewardListReply, error)
+	LockSystem(context.Context, *LockSystemRequest) (*LockSystemReply, error)
 	AdminUserList(context.Context, *AdminUserListRequest) (*AdminUserListReply, error)
 	CheckAdminUserArea(context.Context, *CheckAdminUserAreaRequest) (*CheckAdminUserAreaReply, error)
 	CheckAndInsertLocationsRecommendUser(context.Context, *CheckAndInsertLocationsRecommendUserRequest) (*CheckAndInsertLocationsRecommendUserReply, error)
@@ -542,6 +553,9 @@ func (UnimplementedAppServer) Deposit(context.Context, *DepositRequest) (*Deposi
 }
 func (UnimplementedAppServer) AdminRewardList(context.Context, *AdminRewardListRequest) (*AdminRewardListReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AdminRewardList not implemented")
+}
+func (UnimplementedAppServer) LockSystem(context.Context, *LockSystemRequest) (*LockSystemReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LockSystem not implemented")
 }
 func (UnimplementedAppServer) AdminUserList(context.Context, *AdminUserListRequest) (*AdminUserListReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AdminUserList not implemented")
@@ -816,6 +830,24 @@ func _App_AdminRewardList_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AppServer).AdminRewardList(ctx, req.(*AdminRewardListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _App_LockSystem_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LockSystemRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppServer).LockSystem(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.App/LockSystem",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppServer).LockSystem(ctx, req.(*LockSystemRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1474,6 +1506,10 @@ var App_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AdminRewardList",
 			Handler:    _App_AdminRewardList_Handler,
+		},
+		{
+			MethodName: "LockSystem",
+			Handler:    _App_LockSystem_Handler,
 		},
 		{
 			MethodName: "AdminUserList",

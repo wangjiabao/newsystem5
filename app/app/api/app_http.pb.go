@@ -54,6 +54,7 @@ const OperationAppCheckAndInsertLocationsRecommendUser = "/api.App/CheckAndInser
 const OperationAppCheckAndInsertRecommendArea = "/api.App/CheckAndInsertRecommendArea"
 const OperationAppDeposit = "/api.App/Deposit"
 const OperationAppFeeRewardList = "/api.App/FeeRewardList"
+const OperationAppLockSystem = "/api.App/LockSystem"
 const OperationAppMyAuthList = "/api.App/MyAuthList"
 const OperationAppRecommendList = "/api.App/RecommendList"
 const OperationAppRecommendRewardList = "/api.App/RecommendRewardList"
@@ -99,6 +100,7 @@ type AppHTTPServer interface {
 	CheckAndInsertRecommendArea(context.Context, *CheckAndInsertRecommendAreaRequest) (*CheckAndInsertRecommendAreaReply, error)
 	Deposit(context.Context, *DepositRequest) (*DepositReply, error)
 	FeeRewardList(context.Context, *FeeRewardListRequest) (*FeeRewardListReply, error)
+	LockSystem(context.Context, *LockSystemRequest) (*LockSystemReply, error)
 	MyAuthList(context.Context, *MyAuthListRequest) (*MyAuthListReply, error)
 	RecommendList(context.Context, *RecommendListRequest) (*RecommendListReply, error)
 	RecommendRewardList(context.Context, *RecommendRewardListRequest) (*RecommendRewardListReply, error)
@@ -120,6 +122,7 @@ func RegisterAppHTTPServer(s *http.Server, srv AppHTTPServer) {
 	r.POST("/api/app_server/withdraw", _App_Withdraw0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/deposit", _App_Deposit0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/reward_list", _App_AdminRewardList0_HTTP_Handler(srv))
+	r.GET("/api/admin_dhb/lock_system", _App_LockSystem0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/user_list", _App_AdminUserList0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/check_admin_user_area", _App_CheckAdminUserArea0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/check_and_insert_locations_recommend_user", _App_CheckAndInsertLocationsRecommendUser0_HTTP_Handler(srv))
@@ -326,6 +329,25 @@ func _App_AdminRewardList0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context
 			return err
 		}
 		reply := out.(*AdminRewardListReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _App_LockSystem0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in LockSystemRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAppLockSystem)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.LockSystem(ctx, req.(*LockSystemRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*LockSystemReply)
 		return ctx.Result(200, reply)
 	}
 }
@@ -1048,6 +1070,7 @@ type AppHTTPClient interface {
 	CheckAndInsertRecommendArea(ctx context.Context, req *CheckAndInsertRecommendAreaRequest, opts ...http.CallOption) (rsp *CheckAndInsertRecommendAreaReply, err error)
 	Deposit(ctx context.Context, req *DepositRequest, opts ...http.CallOption) (rsp *DepositReply, err error)
 	FeeRewardList(ctx context.Context, req *FeeRewardListRequest, opts ...http.CallOption) (rsp *FeeRewardListReply, err error)
+	LockSystem(ctx context.Context, req *LockSystemRequest, opts ...http.CallOption) (rsp *LockSystemReply, err error)
 	MyAuthList(ctx context.Context, req *MyAuthListRequest, opts ...http.CallOption) (rsp *MyAuthListReply, err error)
 	RecommendList(ctx context.Context, req *RecommendListRequest, opts ...http.CallOption) (rsp *RecommendListReply, err error)
 	RecommendRewardList(ctx context.Context, req *RecommendRewardListRequest, opts ...http.CallOption) (rsp *RecommendRewardListReply, err error)
@@ -1513,6 +1536,19 @@ func (c *AppHTTPClientImpl) FeeRewardList(ctx context.Context, in *FeeRewardList
 	pattern := "/api/app_server/fee_reward_list"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationAppFeeRewardList))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *AppHTTPClientImpl) LockSystem(ctx context.Context, in *LockSystemRequest, opts ...http.CallOption) (*LockSystemReply, error) {
+	var out LockSystemReply
+	pattern := "/api/admin_dhb/lock_system"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationAppLockSystem))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

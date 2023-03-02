@@ -2394,6 +2394,208 @@ var _ interface {
 	ErrorName() string
 } = AdminRewardListReplyValidationError{}
 
+// Validate checks the field values on LockSystemRequest with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *LockSystemRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on LockSystemRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// LockSystemRequestMultiError, or nil if none found.
+func (m *LockSystemRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *LockSystemRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return LockSystemRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// LockSystemRequestMultiError is an error wrapping multiple validation errors
+// returned by LockSystemRequest.ValidateAll() if the designated constraints
+// aren't met.
+type LockSystemRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m LockSystemRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m LockSystemRequestMultiError) AllErrors() []error { return m }
+
+// LockSystemRequestValidationError is the validation error returned by
+// LockSystemRequest.Validate if the designated constraints aren't met.
+type LockSystemRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e LockSystemRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e LockSystemRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e LockSystemRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e LockSystemRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e LockSystemRequestValidationError) ErrorName() string {
+	return "LockSystemRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e LockSystemRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sLockSystemRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = LockSystemRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = LockSystemRequestValidationError{}
+
+// Validate checks the field values on LockSystemReply with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *LockSystemReply) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on LockSystemReply with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// LockSystemReplyMultiError, or nil if none found.
+func (m *LockSystemReply) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *LockSystemReply) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return LockSystemReplyMultiError(errors)
+	}
+
+	return nil
+}
+
+// LockSystemReplyMultiError is an error wrapping multiple validation errors
+// returned by LockSystemReply.ValidateAll() if the designated constraints
+// aren't met.
+type LockSystemReplyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m LockSystemReplyMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m LockSystemReplyMultiError) AllErrors() []error { return m }
+
+// LockSystemReplyValidationError is the validation error returned by
+// LockSystemReply.Validate if the designated constraints aren't met.
+type LockSystemReplyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e LockSystemReplyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e LockSystemReplyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e LockSystemReplyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e LockSystemReplyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e LockSystemReplyValidationError) ErrorName() string { return "LockSystemReplyValidationError" }
+
+// Error satisfies the builtin error interface
+func (e LockSystemReplyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sLockSystemReply.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = LockSystemReplyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = LockSystemReplyValidationError{}
+
 // Validate checks the field values on CheckAdminUserAreaRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.

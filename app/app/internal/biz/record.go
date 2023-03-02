@@ -2,6 +2,7 @@ package biz
 
 import (
 	"context"
+	v1 "dhb/app/app/api"
 	"fmt"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
@@ -126,6 +127,10 @@ func NewRecordUseCase(
 
 func (ruc *RecordUseCase) GetEthUserRecordByTxHash(ctx context.Context, txHash ...string) (map[string]*EthUserRecord, error) {
 	return ruc.ethUserRecordRepo.GetEthUserRecordListByHash(ctx, txHash...)
+}
+
+func (ruc *RecordUseCase) GetGlobalLock(ctx context.Context) (*GlobalLock, error) {
+	return ruc.locationRepo.GetLockGlobalLocation(ctx)
 }
 
 func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord ...*EthUserRecord) (bool, error) {
@@ -554,20 +559,9 @@ func (ruc *RecordUseCase) AdminLocationInsert(ctx context.Context, userId int64,
 	return true, nil
 }
 
-func (ruc *RecordUseCase) LockEthUserRecordHandle(ctx context.Context, ethUserRecord ...*EthUserRecord) (bool, error) {
-	var (
-		lock bool
-	)
-	// todo 全局锁
-	for i := 0; i < 3; i++ {
-		lock, _ = ruc.locationRepo.LockGlobalLocation(ctx)
-		if lock {
-			return true, nil
-		}
-		time.Sleep(5 * time.Second)
-	}
-
-	return false, nil
+func (ruc *RecordUseCase) LockSystem(ctx context.Context, req *v1.LockSystemRequest) (*v1.LockSystemReply, error) {
+	_, _ = ruc.locationRepo.LockGlobalLocation(ctx)
+	return nil, nil
 }
 
 func (ruc *RecordUseCase) UnLockEthUserRecordHandle(ctx context.Context, ethUserRecord ...*EthUserRecord) (bool, error) {

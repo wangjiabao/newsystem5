@@ -418,9 +418,9 @@ func (lr *LocationRepo) GetLocationsStopNotUpdate(ctx context.Context) ([]*biz.L
 
 // LockGlobalLocation .
 func (lr *LocationRepo) LockGlobalLocation(ctx context.Context) (bool, error) {
-	res := lr.data.DB(ctx).Where("id=? and status<=?", 1, 2).
+	res := lr.data.DB(ctx).Where("id=?", 1).
 		Table("global_lock").
-		Updates(map[string]interface{}{"status": 1})
+		Updates(map[string]interface{}{"status": 2})
 
 	if 0 <= res.RowsAffected {
 		return true, nil

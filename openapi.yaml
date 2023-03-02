@@ -521,6 +521,24 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /api/admin_dhb/lock_system:
+        get:
+            tags:
+                - App
+            operationId: App_LockSystem
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/LockSystemReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /api/admin_dhb/login:
         post:
             tags:
@@ -1455,6 +1473,9 @@ components:
                     description: The type of the serialized message.
             additionalProperties: true
             description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
+        LockSystemReply:
+            type: object
+            properties: {}
         MyAuthListReply:
             type: object
             properties:

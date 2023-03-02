@@ -73,6 +73,12 @@ service App {
 		};
 	};
 
+	rpc LockSystem (LockSystemRequest) returns (LockSystemReply) {
+		option (google.api.http) = {
+			get: "/api/admin_dhb/lock_system"
+		};
+	};
+
 	rpc AdminUserList (AdminUserListRequest) returns (AdminUserListReply) {
 		option (google.api.http) = {
 			get: "/api/admin_dhb/user_list"
@@ -437,6 +443,14 @@ message AdminRewardListReply {
 		string reason = 6;
 	}
 	 int64 count = 2;
+}
+
+message LockSystemRequest {
+
+}
+
+message LockSystemReply {
+
 }
 
 message CheckAdminUserAreaRequest {
