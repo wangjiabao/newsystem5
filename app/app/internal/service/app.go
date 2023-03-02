@@ -304,7 +304,7 @@ func requestEthDepositResult(offset int64, page int64, contractAddress string) (
 		return nil, err
 	}
 
-	fmt.Println(string(b))
+	//fmt.Println(string(b))
 
 	res := make(map[string]*eth, 0)
 	for _, v := range i.Result {
