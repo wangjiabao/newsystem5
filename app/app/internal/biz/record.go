@@ -297,9 +297,9 @@ func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord
 						tmpStatus := myUserRecommendUserLocationLast.Status // 现在还在运行中
 
 						// 奖励usdt
-						tmpBalanceAmount := currentValue / myUserRecommendUserLocationLast.OutRate / 100 * recommendNeed / 100 * rewardRate // 记录下一次
+						tmpBalanceAmount := currentValue * recommendNeed / 100 * rewardRate / 100 // 记录下一次
 						// 奖励币
-						tmpBalanceCoinAmount := currentValue / myUserRecommendUserLocationLast.OutRate / 100 * recommendNeed / 100 * coinRewardRate / 1000 * coinPrice
+						tmpBalanceCoinAmount := currentValue * recommendNeed / 100 * coinRewardRate / 100 * coinPrice / 1000
 
 						myUserRecommendUserLocationLast.Status = "running"
 						myUserRecommendUserLocationLast.Current += tmpBalanceAmount
@@ -363,10 +363,10 @@ func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord
 				}
 			}
 
-			err = ruc.userBalanceRepo.SystemReward(ctx, amount, currentLocationNew.ID)
-			if nil != err {
-				return err
-			}
+			//err = ruc.userBalanceRepo.SystemReward(ctx, amount, currentLocationNew.ID)
+			//if nil != err {
+			//	return err
+			//}
 
 			_, err = ruc.ethUserRecordRepo.CreateEthUserRecordListByHash(ctx, &EthUserRecord{
 				Hash:     v.Hash,
