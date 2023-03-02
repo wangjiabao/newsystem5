@@ -508,12 +508,12 @@ func (lr *LocationRepo) UpdateLocation(ctx context.Context, id int64, status str
 }
 
 // UpdateLocationNew .
-func (lr *LocationRepo) UpdateLocationNew(ctx context.Context, id int64, status string, current int64, stopDate time.Time, stopCoin int64) error {
+func (lr *LocationRepo) UpdateLocationNew(ctx context.Context, id int64, status string, current int64, stopDate time.Time) error {
 
 	if "stop" == status {
 		res := lr.data.DB(ctx).Table("location_new").
 			Where("id=?", id).
-			Updates(map[string]interface{}{"current": gorm.Expr("current + ?", current), "status": "stop", "stop_date": stopDate, "stop_coin": stopCoin})
+			Updates(map[string]interface{}{"current": gorm.Expr("current + ?", current), "status": "stop", "stop_date": stopDate})
 		if 0 == res.RowsAffected || res.Error != nil {
 			return res.Error
 		}

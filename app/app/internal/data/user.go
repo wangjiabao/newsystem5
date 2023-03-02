@@ -1177,13 +1177,13 @@ func (ub *UserBalanceRepo) UpdateLocationAgain(ctx context.Context, locations []
 }
 
 // DepositLastNew .
-func (ub *UserBalanceRepo) DepositLastNew(ctx context.Context, userId int64, lastAmount int64, lastCoinAmount int64) (int64, error) {
+func (ub *UserBalanceRepo) DepositLastNew(ctx context.Context, userId int64, lastAmount int64, lastUsdtAmount int64, lastCoinAmount int64) (int64, error) {
 	var (
 		err error
 	)
 	if err = ub.data.DB(ctx).Table("user_balance").
 		Where("user_id=?", userId).
-		Updates(map[string]interface{}{"balance_usdt": gorm.Expr("balance_usdt + ?", lastAmount), "balance_dhb": gorm.Expr("balance_dhb + ?", lastCoinAmount)}).Error; nil != err {
+		Updates(map[string]interface{}{"balance_usdt": gorm.Expr("balance_usdt + ?", lastUsdtAmount), "balance_dhb": gorm.Expr("balance_dhb + ?", lastCoinAmount)}).Error; nil != err {
 		return 0, errors.NotFound("user balance err", "user balance not found")
 	}
 
@@ -1218,7 +1218,7 @@ func (ub *UserBalanceRepo) DepositLastNew(ctx context.Context, userId int64, las
 }
 
 // UserDailyLocationReward .
-func (ub *UserBalanceRepo) UserDailyLocationReward(ctx context.Context, userId int64, amount int64, coinAmount int64, status string, locationId int64) (int64, error) {
+func (ub *UserBalanceRepo) UserDailyLocationReward(ctx context.Context, userId int64, rewardAmount int64, amount int64, coinAmount int64, status string, locationId int64) (int64, error) {
 	var err error
 	if "running" == status {
 		if err = ub.data.DB(ctx).Table("user_balance").
@@ -1239,7 +1239,7 @@ func (ub *UserBalanceRepo) UserDailyLocationReward(ctx context.Context, userId i
 	userBalanceRecode.Balance = userBalance.BalanceUsdt
 	userBalanceRecode.UserId = userBalance.UserId
 	userBalanceRecode.Type = "reward"
-	userBalanceRecode.Amount = amount
+	userBalanceRecode.Amount = rewardAmount
 	err = ub.data.DB(ctx).Table("user_balance_record").Create(&userBalanceRecode).Error
 	if err != nil {
 		return 0, err
@@ -1247,7 +1247,7 @@ func (ub *UserBalanceRepo) UserDailyLocationReward(ctx context.Context, userId i
 
 	var reward Reward
 	reward.UserId = userBalance.UserId
-	reward.Amount = amount
+	reward.Amount = rewardAmount
 	reward.BalanceRecordId = userBalanceRecode.ID
 	reward.Type = "system_reward_daily"     // 本次分红的行为类型
 	reward.Reason = "location_daily_reward" // 给我分红的理由
@@ -1699,7 +1699,7 @@ func (ub *UserBalanceRepo) UpdateBalanceRewardLastRewardDate(ctx context.Context
 }
 
 // RecommendTeamReward .
-func (ub *UserBalanceRepo) RecommendTeamReward(ctx context.Context, userId int64, amount int64, amountDhb int64, locationId int64, recommendNum int64, status string) (int64, error) {
+func (ub *UserBalanceRepo) RecommendTeamReward(ctx context.Context, userId int64, rewardAmount int64, amount int64, amountDhb int64, locationId int64, recommendNum int64, status string) (int64, error) {
 	var err error
 	if "running" == status {
 		if err = ub.data.DB(ctx).Table("user_balance").
@@ -1719,7 +1719,7 @@ func (ub *UserBalanceRepo) RecommendTeamReward(ctx context.Context, userId int64
 	userBalanceRecode.Balance = userBalance.BalanceUsdt
 	userBalanceRecode.UserId = userBalance.UserId
 	userBalanceRecode.Type = "reward"
-	userBalanceRecode.Amount = amount
+	userBalanceRecode.Amount = rewardAmount
 	err = ub.data.DB(ctx).Table("user_balance_record").Create(&userBalanceRecode).Error
 	if err != nil {
 		return 0, err
@@ -1727,7 +1727,7 @@ func (ub *UserBalanceRepo) RecommendTeamReward(ctx context.Context, userId int64
 
 	var reward Reward
 	reward.UserId = userBalance.UserId
-	reward.Amount = amount
+	reward.Amount = rewardAmount
 	reward.BalanceRecordId = userBalanceRecode.ID
 	reward.Type = "system_reward_daily" // 本次分红的行为类型
 	reward.TypeRecordId = locationId
@@ -1945,7 +1945,7 @@ func (ub *UserBalanceRepo) UserDailyFee(ctx context.Context, userId int64, amoun
 }
 
 // UserDailyRecommendArea .
-func (ub *UserBalanceRepo) UserDailyRecommendArea(ctx context.Context, userId int64, amount int64, amountDhb int64, status string) (int64, error) {
+func (ub *UserBalanceRepo) UserDailyRecommendArea(ctx context.Context, userId int64, rewardAmount int64, amount int64, amountDhb int64, status string) (int64, error) {
 	var err error
 	if "running" == status {
 		if err = ub.data.DB(ctx).Table("user_balance").
@@ -1966,7 +1966,7 @@ func (ub *UserBalanceRepo) UserDailyRecommendArea(ctx context.Context, userId in
 	userBalanceRecode.Balance = userBalance.BalanceUsdt
 	userBalanceRecode.UserId = userBalance.UserId
 	userBalanceRecode.Type = "reward"
-	userBalanceRecode.Amount = amount
+	userBalanceRecode.Amount = rewardAmount
 	err = ub.data.DB(ctx).Table("user_balance_record").Create(&userBalanceRecode).Error
 	if err != nil {
 		return 0, err
@@ -1974,7 +1974,7 @@ func (ub *UserBalanceRepo) UserDailyRecommendArea(ctx context.Context, userId in
 
 	var reward Reward
 	reward.UserId = userBalance.UserId
-	reward.Amount = amount
+	reward.Amount = rewardAmount
 	reward.BalanceRecordId = userBalanceRecode.ID
 	reward.Type = "system_reward_daily"    // 本次分红的行为类型
 	reward.Reason = "daily_recommend_area" // 给我分红的理由
@@ -1987,7 +1987,7 @@ func (ub *UserBalanceRepo) UserDailyRecommendArea(ctx context.Context, userId in
 }
 
 // UserDailyBalanceReward .
-func (ub *UserBalanceRepo) UserDailyBalanceReward(ctx context.Context, userId int64, amount int64, amountDhb int64, status string) (int64, error) {
+func (ub *UserBalanceRepo) UserDailyBalanceReward(ctx context.Context, userId int64, rewardAmount int64, amount int64, amountDhb int64, status string) (int64, error) {
 	var err error
 	if "running" == status {
 		if err = ub.data.DB(ctx).Table("user_balance").
@@ -2008,7 +2008,7 @@ func (ub *UserBalanceRepo) UserDailyBalanceReward(ctx context.Context, userId in
 	userBalanceRecode.Balance = userBalance.BalanceUsdt
 	userBalanceRecode.UserId = userBalance.UserId
 	userBalanceRecode.Type = "reward"
-	userBalanceRecode.Amount = amount
+	userBalanceRecode.Amount = rewardAmount
 	err = ub.data.DB(ctx).Table("user_balance_record").Create(&userBalanceRecode).Error
 	if err != nil {
 		return 0, err
@@ -2016,7 +2016,7 @@ func (ub *UserBalanceRepo) UserDailyBalanceReward(ctx context.Context, userId in
 
 	var reward Reward
 	reward.UserId = userBalance.UserId
-	reward.Amount = amount
+	reward.Amount = rewardAmount
 	reward.BalanceRecordId = userBalanceRecode.ID
 	reward.Type = "system_reward_daily"    // 本次分红的行为类型
 	reward.Reason = "daily_balance_reward" // 给我分红的理由
@@ -2158,7 +2158,7 @@ func (ub *UserBalanceRepo) NormalRecommendTopReward(ctx context.Context, userId 
 }
 
 // NormalRecommendReward .
-func (ub *UserBalanceRepo) NormalRecommendReward(ctx context.Context, userId int64, amount int64, amountDhb int64, locationId int64, status string) (int64, error) {
+func (ub *UserBalanceRepo) NormalRecommendReward(ctx context.Context, userId int64, rewardAmount int64, amount int64, amountDhb int64, locationId int64, status string) (int64, error) {
 	var err error
 	if "running" == status {
 		if err = ub.data.DB(ctx).Table("user_balance").
@@ -2178,7 +2178,7 @@ func (ub *UserBalanceRepo) NormalRecommendReward(ctx context.Context, userId int
 	userBalanceRecode.Balance = userBalance.BalanceUsdt
 	userBalanceRecode.UserId = userBalance.UserId
 	userBalanceRecode.Type = "reward"
-	userBalanceRecode.Amount = amount
+	userBalanceRecode.Amount = rewardAmount
 	err = ub.data.DB(ctx).Table("user_balance_record").Create(&userBalanceRecode).Error
 	if err != nil {
 		return 0, err
@@ -2186,7 +2186,7 @@ func (ub *UserBalanceRepo) NormalRecommendReward(ctx context.Context, userId int
 
 	var reward Reward
 	reward.UserId = userBalance.UserId
-	reward.Amount = amount
+	reward.Amount = rewardAmount
 	reward.BalanceRecordId = userBalanceRecode.ID
 	reward.Type = "location" // 本次分红的行为类型
 	reward.TypeRecordId = locationId

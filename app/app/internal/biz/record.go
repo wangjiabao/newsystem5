@@ -98,7 +98,7 @@ type LocationRepo interface {
 	CreateLocationNew(ctx context.Context, rel *LocationNew) (*LocationNew, error)
 	GetMyStopLocationsLast(ctx context.Context, userId int64) ([]*LocationNew, error)
 	GetLocationsNewByUserId(ctx context.Context, userId int64) ([]*LocationNew, error)
-	UpdateLocationNew(ctx context.Context, id int64, status string, current int64, stopDate time.Time, stopCoin int64) error
+	UpdateLocationNew(ctx context.Context, id int64, status string, current int64, stopDate time.Time) error
 	GetRunningLocations(ctx context.Context) ([]*LocationNew, error)
 }
 
@@ -168,9 +168,9 @@ func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord
 		fmt.Println(v)
 		var (
 			currentValue                     int64
-			amount                           int64
 			locationCurrent                  int64
 			stopCoin                         int64
+			stopUsdt                         int64
 			locationCurrentMax               int64
 			currentLocationNew               *LocationNew
 			userRecommend                    *UserRecommend
@@ -206,7 +206,6 @@ func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord
 		// 金额
 		locationCurrentMax = v.RelAmount * outRate
 		currentValue = v.RelAmount
-		amount = v.RelAmount
 
 		// 推荐人
 		userRecommend, err = ruc.userRecommendRepo.GetUserRecommendByUserId(ctx, v.UserId)
@@ -230,7 +229,6 @@ func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord
 			for _, vMyLastStopLocations := range myLastStopLocations {
 				if now.Before(vMyLastStopLocations.StopDate.Add(time.Duration(timeAgain) * time.Minute)) {
 					locationCurrent += vMyLastStopLocations.Current - vMyLastStopLocations.CurrentMax // 补上
-					stopCoin += vMyLastStopLocations.StopCoin
 				}
 			}
 		}
@@ -302,28 +300,32 @@ func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord
 						tmpStatus := myUserRecommendUserLocationLast.Status // 现在还在运行中
 
 						// 奖励usdt
-						tmpBalanceAmount := currentValue * recommendNeed / 100 * rewardRate / 100 // 记录下一次
-						// 奖励币
-						tmpBalanceCoinAmount := currentValue * recommendNeed / 100 * coinRewardRate / 100 * coinPrice / 1000
+						tmpRewardAmount := currentValue * recommendNeed / 100
+
+						tmpBalanceAmount := tmpRewardAmount * rewardRate / 100 // 记录下一次
+						tmpBalanceCoinAmount := tmpRewardAmount * coinRewardRate / 100 * coinPrice / 1000
 
 						myUserRecommendUserLocationLast.Status = "running"
-						myUserRecommendUserLocationLast.Current += tmpBalanceAmount
+						myUserRecommendUserLocationLast.Current += tmpRewardAmount
+
 						if myUserRecommendUserLocationLast.Current >= myUserRecommendUserLocationLast.CurrentMax { // 占位分红人分满停止
 							myUserRecommendUserLocationLast.Status = "stop"
 							if "running" == tmpStatus {
 								myUserRecommendUserLocationLast.StopDate = time.Now().UTC().Add(8 * time.Hour)
+								// 这里刚刚停止
+								tmpLastAmount := tmpRewardAmount - (myUserRecommendUserLocationLast.Current - myUserRecommendUserLocationLast.CurrentMax)
+								tmpBalanceAmount = tmpLastAmount * rewardRate / 100 // 记录下一次
+								tmpBalanceCoinAmount = tmpLastAmount * coinRewardRate / 100 * coinPrice / 1000
 							}
 						}
-						if 0 < tmpBalanceAmount {
-							err = ruc.locationRepo.UpdateLocationNew(ctx, myUserRecommendUserLocationLast.ID, myUserRecommendUserLocationLast.Status, tmpBalanceAmount, myUserRecommendUserLocationLast.StopDate, tmpBalanceCoinAmount) // 分红占位数据修改
+
+						if 0 < tmpRewardAmount {
+							err = ruc.locationRepo.UpdateLocationNew(ctx, myUserRecommendUserLocationLast.ID, myUserRecommendUserLocationLast.Status, tmpRewardAmount, myUserRecommendUserLocationLast.StopDate) // 分红占位数据修改
 							if nil != err {
 								return err
 							}
-						}
-						amount -= tmpBalanceAmount // 扣除
 
-						if 0 < tmpBalanceAmount { // 这次还能分红
-							_, err = ruc.userBalanceRepo.NormalRecommendReward(ctx, myUserRecommendUserId, tmpBalanceAmount, tmpBalanceCoinAmount, currentLocationNew.ID, tmpStatus) // 直推人奖励
+							_, err = ruc.userBalanceRepo.NormalRecommendReward(ctx, myUserRecommendUserId, tmpRewardAmount, tmpBalanceAmount, tmpBalanceCoinAmount, currentLocationNew.ID, tmpStatus) // 直推人奖励
 							if nil != err {
 								return err
 							}
@@ -368,7 +370,11 @@ func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord
 					} else {
 						tmpCurrentAmount = locationCurrent
 					}
-					_, err = ruc.userBalanceRepo.DepositLastNew(ctx, v.UserId, tmpCurrentAmount, stopCoin) // 充值
+
+					stopUsdt += tmpCurrentAmount * rewardRate / 100 // 记录下一次
+					stopCoin += tmpCurrentAmount * coinRewardRate / 100 * coinPrice / 1000
+
+					_, err = ruc.userBalanceRepo.DepositLastNew(ctx, v.UserId, tmpCurrentAmount, stopUsdt, stopCoin) // 充值
 					if nil != err {
 						return err
 					}
@@ -407,6 +413,7 @@ func (ruc *RecordUseCase) AdminLocationInsert(ctx context.Context, userId int64,
 		currentLocation         *LocationNew
 		myLastStopLocations     []*LocationNew
 		stopCoin                int64
+		stopUsdt                int64
 		err                     error
 		configs                 []*Config
 		myLocations             []*LocationNew
@@ -415,17 +422,26 @@ func (ruc *RecordUseCase) AdminLocationInsert(ctx context.Context, userId int64,
 		myUserRecommendUserInfo *UserInfo
 		myUserRecommendUserId   int64
 		locationCurrent         int64
+		coinPrice               int64
+		coinRewardRate          int64
+		rewardRate              int64
 		outRate                 int64
 		timeAgain               int64
 	)
 	// 配置
-	configs, _ = ruc.configRepo.GetConfigByKeys(ctx, "time_again", "out_rate")
+	configs, _ = ruc.configRepo.GetConfigByKeys(ctx, "recommend_need", "time_again", "out_rate", "coin_price", "reward_rate", "coin_reward_rate")
 	if nil != configs {
 		for _, vConfig := range configs {
 			if "time_again" == vConfig.KeyName {
 				timeAgain, _ = strconv.ParseInt(vConfig.Value, 10, 64)
 			} else if "out_rate" == vConfig.KeyName {
 				outRate, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "coin_price" == vConfig.KeyName {
+				coinPrice, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "coin_reward_rate" == vConfig.KeyName {
+				coinRewardRate, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "reward_rate" == vConfig.KeyName {
+				rewardRate, _ = strconv.ParseInt(vConfig.Value, 10, 64)
 			}
 		}
 	}
@@ -456,7 +472,6 @@ func (ruc *RecordUseCase) AdminLocationInsert(ctx context.Context, userId int64,
 		for _, vMyLastStopLocations := range myLastStopLocations {
 			if now.Before(vMyLastStopLocations.StopDate.Add(time.Duration(timeAgain) * time.Minute)) {
 				locationCurrent += vMyLastStopLocations.Current - vMyLastStopLocations.CurrentMax // 补上
-				stopCoin += vMyLastStopLocations.StopCoin
 			}
 		}
 	}
@@ -541,7 +556,11 @@ func (ruc *RecordUseCase) AdminLocationInsert(ctx context.Context, userId int64,
 				} else {
 					tmpCurrentAmount = locationCurrent
 				}
-				_, err = ruc.userBalanceRepo.DepositLastNew(ctx, userId, tmpCurrentAmount, stopCoin) // 充值
+
+				stopUsdt += tmpCurrentAmount * rewardRate / 100 // 记录下一次
+				stopCoin += tmpCurrentAmount * coinRewardRate / 100 * coinPrice / 1000
+
+				_, err = ruc.userBalanceRepo.DepositLastNew(ctx, userId, tmpCurrentAmount, stopUsdt, stopCoin) // 充值
 				if nil != err {
 					return err
 				}
