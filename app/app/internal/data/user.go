@@ -2390,7 +2390,7 @@ func (ub *UserBalanceRepo) GetBalanceRewardCurrent(ctx context.Context, now time
 }
 
 // GetUserRewards .
-func (ub *UserBalanceRepo) GetUserRewards(ctx context.Context, b *biz.Pagination, userId int64) ([]*biz.Reward, error, int64) {
+func (ub *UserBalanceRepo) GetUserRewards(ctx context.Context, b *biz.Pagination, userId int64, reason string) ([]*biz.Reward, error, int64) {
 	var (
 		rewards []*Reward
 		count   int64
@@ -2401,6 +2401,10 @@ func (ub *UserBalanceRepo) GetUserRewards(ctx context.Context, b *biz.Pagination
 
 	if 0 < userId {
 		instance = instance.Where("user_id=?", userId)
+	}
+
+	if "" != reason {
+		instance = instance.Where("reason=?", reason)
 	}
 
 	instance = instance.Count(&count)

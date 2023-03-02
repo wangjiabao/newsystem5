@@ -424,6 +424,7 @@ message WithdrawReply {
 message AdminRewardListRequest {
 	int64 page = 1;
 	string address = 2;
+	string reason = 3;
 }
 
 message AdminRewardListReply {

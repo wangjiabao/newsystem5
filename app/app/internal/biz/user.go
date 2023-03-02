@@ -178,7 +178,7 @@ type UserBalanceRepo interface {
 	DepositDhb(ctx context.Context, userId int64, amount int64) (int64, error)
 	GetUserBalance(ctx context.Context, userId int64) (*UserBalance, error)
 	GetUserRewardByUserId(ctx context.Context, userId int64) ([]*Reward, error)
-	GetUserRewards(ctx context.Context, b *Pagination, userId int64) ([]*Reward, error, int64)
+	GetUserRewards(ctx context.Context, b *Pagination, userId int64, reason string) ([]*Reward, error, int64)
 	GetUserRewardsLastMonthFee(ctx context.Context) ([]*Reward, error)
 	GetUserBalanceByUserIds(ctx context.Context, userIds ...int64) (map[int64]*UserBalance, error)
 	GetUserBalanceUsdtTotal(ctx context.Context) (int64, error)
@@ -362,7 +362,7 @@ func (uuc *UserUseCase) AdminRewardList(ctx context.Context, req *v1.AdminReward
 	userRewards, err, count = uuc.ubRepo.GetUserRewards(ctx, &Pagination{
 		PageNum:  int(req.Page),
 		PageSize: 10,
-	}, userId)
+	}, userId, req.Reason)
 	if nil != err {
 		return res, nil
 	}

@@ -2174,6 +2174,8 @@ func (m *AdminRewardListRequest) validate(all bool) error {
 
 	// no validation rules for Address
 
+	// no validation rules for Reason
+
 	if len(errors) > 0 {
 		return AdminRewardListRequestMultiError(errors)
 	}

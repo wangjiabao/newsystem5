@@ -606,6 +606,10 @@ paths:
                   in: query
                   schema:
                     type: string
+                - name: reason
+                  in: query
+                  schema:
+                    type: string
             responses:
                 "200":
                     description: OK
