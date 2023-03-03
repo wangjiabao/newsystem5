@@ -1672,7 +1672,7 @@ func (uuc *UserUseCase) AdminDailyLocationReward(ctx context.Context, req *v1.Ad
 			tmpRecommendUserIds []string
 		)
 
-		tmpCurrentReward := vUserLocations.CurrentMax / vUserLocations.OutRate * locationRewardRate / 100
+		tmpCurrentReward := vUserLocations.CurrentMax * 100 / vUserLocations.OutRate * locationRewardRate / 100
 
 		// 推荐人
 		userRecommend, err = uuc.urRepo.GetUserRecommendByUserId(ctx, vUserLocations.UserId)
@@ -1853,7 +1853,7 @@ func (uuc *UserUseCase) AdminDailyRecommendReward(ctx context.Context, req *v1.A
 		return nil, err
 	}
 	for _, userLocation := range userLocations {
-		fee += userLocation.CurrentMax / userLocation.OutRate
+		fee += userLocation.CurrentMax * 100 / userLocation.OutRate
 	}
 	if 0 >= fee {
 		return &v1.AdminDailyRecommendRewardReply{}, nil

@@ -204,7 +204,7 @@ func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord
 		}
 
 		// 金额
-		locationCurrentMax = v.RelAmount * outRate
+		locationCurrentMax = v.RelAmount * outRate / 100
 		currentValue = v.RelAmount
 
 		// 推荐人
