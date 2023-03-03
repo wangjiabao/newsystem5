@@ -3,7 +3,6 @@ package biz
 import (
 	"context"
 	v1 "dhb/app/app/api"
-	"fmt"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	"strconv"
@@ -165,7 +164,7 @@ func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord
 	}
 
 	for _, v := range ethUserRecord {
-		fmt.Println(v)
+		//fmt.Println(v)
 		var (
 			currentValue                     int64
 			locationCurrent                  int64
