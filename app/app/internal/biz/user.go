@@ -182,6 +182,7 @@ type UserBalanceRepo interface {
 	GetUserRewardsLastMonthFee(ctx context.Context) ([]*Reward, error)
 	GetUserBalanceByUserIds(ctx context.Context, userIds ...int64) (map[int64]*UserBalance, error)
 	GetUserBalanceUsdtTotal(ctx context.Context) (int64, error)
+	GetUserBalanceDHBTotal(ctx context.Context) (int64, error)
 	GreateWithdraw(ctx context.Context, userId int64, amount int64, coinType string) (*Withdraw, error)
 	WithdrawUsdt(ctx context.Context, userId int64, amount int64) error
 	WithdrawDhb(ctx context.Context, userId int64, amount int64) error
@@ -195,8 +196,12 @@ type UserBalanceRepo interface {
 	GetUserBalanceRecordUsdtTotal(ctx context.Context) (int64, error)
 	GetUserBalanceRecordUsdtTotalToday(ctx context.Context) (int64, error)
 	GetUserWithdrawUsdtTotalToday(ctx context.Context) (int64, error)
+	GetUserWithdrawDhbTotalToday(ctx context.Context) (int64, error)
 	GetUserWithdrawUsdtTotal(ctx context.Context) (int64, error)
+	GetUserWithdrawDhbTotal(ctx context.Context) (int64, error)
 	GetUserRewardUsdtTotal(ctx context.Context) (int64, error)
+	GetUserRewardBalanceRewardTotal(ctx context.Context) (int64, error)
+	GetBalanceRewardTotal(ctx context.Context) (int64, error)
 	GetSystemRewardUsdtTotal(ctx context.Context) (int64, error)
 	UpdateWithdrawAmount(ctx context.Context, id int64, status string, amount int64) (*Withdraw, error)
 	GetUserRewardRecommendSort(ctx context.Context) ([]*UserSortRecommendReward, error)
@@ -1378,21 +1383,31 @@ func (uuc *UserUseCase) AdminAll(ctx context.Context, req *v1.AdminAllRequest) (
 		userBalanceRecordUsdtTotal      int64
 		userBalanceRecordUsdtTotalToday int64
 		userWithdrawUsdtTotalToday      int64
+		userWithdrawDhbTotalToday       int64
 		userWithdrawUsdtTotal           int64
 		userRewardUsdtTotal             int64
+		userBalanceDhbTotal             int64
 		systemRewardUsdtTotal           int64
 		userLocationCount               int64
+		userWithdrawDhbTotal            int64
+		balanceRewardRewarded           int64
+		balanceReward                   int64
 	)
 	userCount, _ = uuc.repo.GetUserCount(ctx)
 	userTodayCount, _ = uuc.repo.GetUserCountToday(ctx)
 	userBalanceUsdtTotal, _ = uuc.ubRepo.GetUserBalanceUsdtTotal(ctx)
+	userBalanceDhbTotal, _ = uuc.ubRepo.GetUserBalanceDHBTotal(ctx)
 	userBalanceRecordUsdtTotal, _ = uuc.ubRepo.GetUserBalanceRecordUsdtTotal(ctx)
 	userBalanceRecordUsdtTotalToday, _ = uuc.ubRepo.GetUserBalanceRecordUsdtTotalToday(ctx)
 	userWithdrawUsdtTotalToday, _ = uuc.ubRepo.GetUserWithdrawUsdtTotalToday(ctx)
+	userWithdrawDhbTotalToday, _ = uuc.ubRepo.GetUserWithdrawDhbTotalToday(ctx)
 	userWithdrawUsdtTotal, _ = uuc.ubRepo.GetUserWithdrawUsdtTotal(ctx)
+	userWithdrawDhbTotal, _ = uuc.ubRepo.GetUserWithdrawDhbTotal(ctx)
 	userRewardUsdtTotal, _ = uuc.ubRepo.GetUserRewardUsdtTotal(ctx)
 	systemRewardUsdtTotal, _ = uuc.ubRepo.GetSystemRewardUsdtTotal(ctx)
 	userLocationCount = uuc.locationRepo.GetLocationUserCount(ctx)
+	balanceRewardRewarded, _ = uuc.ubRepo.GetUserRewardBalanceRewardTotal(ctx)
+	balanceReward, _ = uuc.ubRepo.GetBalanceRewardTotal(ctx)
 
 	return &v1.AdminAllReply{
 		TodayTotalUser:        userTodayCount,
@@ -1405,6 +1420,11 @@ func (uuc *UserUseCase) AdminAll(ctx context.Context, req *v1.AdminAllRequest) (
 		AllWithdraw:           fmt.Sprintf("%.2f", float64(userWithdrawUsdtTotal)/float64(10000000000)),
 		AllReward:             fmt.Sprintf("%.2f", float64(userRewardUsdtTotal)/float64(10000000000)),
 		AllSystemRewardAndFee: fmt.Sprintf("%.2f", float64(systemRewardUsdtTotal)/float64(10000000000)),
+		AllBalanceBtc:         fmt.Sprintf("%.2f", float64(userBalanceDhbTotal)/float64(10000000000)),
+		TodayWithdrawBtc:      fmt.Sprintf("%.2f", float64(userWithdrawDhbTotalToday)/float64(10000000000)),
+		AllWithdrawBtc:        fmt.Sprintf("%.2f", float64(userWithdrawDhbTotal)/float64(10000000000)),
+		BalanceReward:         fmt.Sprintf("%.2f", float64(balanceReward)/float64(10000000000)),
+		BalanceRewardRewarded: fmt.Sprintf("%.2f", float64(balanceRewardRewarded)/float64(10000000000)),
 	}, nil
 }
 

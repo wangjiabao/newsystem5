@@ -2612,6 +2612,20 @@ func (ub UserBalanceRepo) GetUserBalanceUsdtTotal(ctx context.Context) (int64, e
 	return total.Total, nil
 }
 
+// GetUserBalanceDHBTotal .
+func (ub UserBalanceRepo) GetUserBalanceDHBTotal(ctx context.Context) (int64, error) {
+	var total UserBalanceTotal
+	if err := ub.data.db.Table("user_balance").Select("sum(balance_dhb) as total").Take(&total).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return total.Total, errors.NotFound("USER_BALANCE_NOT_FOUND", "user balance not found")
+		}
+
+		return total.Total, errors.New(500, "USER BALANCE ERROR", err.Error())
+	}
+
+	return total.Total, nil
+}
+
 // GetUserBalanceRecordUsdtTotal .
 func (ub UserBalanceRepo) GetUserBalanceRecordUsdtTotal(ctx context.Context) (int64, error) {
 	var total UserBalanceTotal
@@ -2692,12 +2706,60 @@ func (ub UserBalanceRepo) GetUserWithdrawUsdtTotalToday(ctx context.Context) (in
 	return total.Total, nil
 }
 
+// GetUserWithdrawDhbTotalToday .
+func (ub UserBalanceRepo) GetUserWithdrawDhbTotalToday(ctx context.Context) (int64, error) {
+	var total UserBalanceTotal
+	now := time.Now().UTC()
+	var startDate time.Time
+	var endDate time.Time
+	if 16 <= now.Hour() {
+		startDate = now
+		endDate = now.AddDate(0, 0, 1)
+	} else {
+		startDate = now.AddDate(0, 0, -1)
+		endDate = now
+	}
+	todayStart := time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 16, 0, 0, 0, time.UTC)
+	todayEnd := time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 16, 0, 0, 0, time.UTC)
+
+	if err := ub.data.db.Table("user_balance_record").
+		Where("type=?", "withdraw").
+		Where("coin_type=?", "dhb").
+		Where("created_at>=?", todayStart).Where("created_at<?", todayEnd).
+		Select("sum(amount) as total").Take(&total).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return total.Total, errors.NotFound("USER_BALANCE_RECORD_NOT_FOUND", "user balance not found")
+		}
+
+		return total.Total, errors.New(500, "USER BALANCE RECORD ERROR", err.Error())
+	}
+
+	return total.Total, nil
+}
+
 // GetUserWithdrawUsdtTotal .
 func (ub UserBalanceRepo) GetUserWithdrawUsdtTotal(ctx context.Context) (int64, error) {
 	var total UserBalanceTotal
 	if err := ub.data.db.Table("user_balance_record").
 		Where("type=?", "withdraw").
 		Where("coin_type=?", "usdt").
+		Select("sum(amount) as total").Take(&total).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return total.Total, errors.NotFound("USER_BALANCE_RECORD_NOT_FOUND", "user balance not found")
+		}
+
+		return total.Total, errors.New(500, "USER BALANCE RECORD ERROR", err.Error())
+	}
+
+	return total.Total, nil
+}
+
+// GetUserWithdrawDhbTotal .
+func (ub UserBalanceRepo) GetUserWithdrawDhbTotal(ctx context.Context) (int64, error) {
+	var total UserBalanceTotal
+	if err := ub.data.db.Table("user_balance_record").
+		Where("type=?", "withdraw").
+		Where("coin_type=?", "dhb").
 		Select("sum(amount) as total").Take(&total).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return total.Total, errors.NotFound("USER_BALANCE_RECORD_NOT_FOUND", "user balance not found")
@@ -2720,6 +2782,38 @@ func (ub UserBalanceRepo) GetUserRewardUsdtTotal(ctx context.Context) (int64, er
 		}
 
 		return total.Total, errors.New(500, "USER BALANCE RECORD ERROR", err.Error())
+	}
+
+	return total.Total, nil
+}
+
+// GetUserRewardBalanceRewardTotal .
+func (ub UserBalanceRepo) GetUserRewardBalanceRewardTotal(ctx context.Context) (int64, error) {
+	var total UserBalanceTotal
+	if err := ub.data.db.Table("user_balance_record").
+		Where("reason=?", "daily_balance_reward").
+		Select("sum(amount) as total").Take(&total).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return total.Total, errors.NotFound("USER_BALANCE_RECORD_NOT_FOUND", "user balance not found")
+		}
+
+		return total.Total, errors.New(500, "USER BALANCE RECORD ERROR", err.Error())
+	}
+
+	return total.Total, nil
+}
+
+// GetBalanceRewardTotal .
+func (ub UserBalanceRepo) GetBalanceRewardTotal(ctx context.Context) (int64, error) {
+	var total UserBalanceTotal
+	if err := ub.data.db.Table("balance_reward").
+		Where("status=?", 1).
+		Select("sum(amount) as total").Take(&total).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return total.Total, errors.NotFound("USER_BALANCE_REWARD_NOT_FOUND", "user balance reward not found")
+		}
+
+		return total.Total, errors.New(500, "USER BALANCE REWARD ERROR", err.Error())
 	}
 
 	return total.Total, nil
