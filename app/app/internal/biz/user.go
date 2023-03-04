@@ -1518,7 +1518,7 @@ func (uuc *UserUseCase) AdminDailyBalanceReward(ctx context.Context, req *v1.Adm
 			tmpCurrentStatus := myLocationLast.Status // 现在还在运行中
 
 			tmpBalanceUsdtAmount := tmpCurrentReward * rewardRate / 100 // 记录下一次
-			tmpBalanceCoinAmount := tmpCurrentReward * coinRewardRate / 100 * coinPrice / 1000
+			tmpBalanceCoinAmount := tmpCurrentReward * coinRewardRate / 100 * 1000 / coinPrice
 
 			myLocationLast.Status = "running"
 			myLocationLast.Current += tmpCurrentReward
@@ -1528,7 +1528,7 @@ func (uuc *UserUseCase) AdminDailyBalanceReward(ctx context.Context, req *v1.Adm
 
 					lastRewardAmount := tmpCurrentReward - (myLocationLast.Current - myLocationLast.CurrentMax)
 					tmpBalanceUsdtAmount = lastRewardAmount * rewardRate / 100 // 记录下一次
-					tmpBalanceCoinAmount = lastRewardAmount * coinRewardRate / 100 * coinPrice / 1000
+					tmpBalanceCoinAmount = lastRewardAmount * coinRewardRate / 100 * 1000 / coinPrice
 				}
 				myLocationLast.Status = "stop"
 			}
@@ -1737,7 +1737,7 @@ func (uuc *UserUseCase) AdminDailyLocationReward(ctx context.Context, req *v1.Ad
 
 								// 奖励usdt
 								tmpMyRecommendAmountUsdt := tmpMyRecommendAmount * rewardRate / 100 // 记录下一次
-								tmpMyRecommendAmountCoin := tmpMyRecommendAmount * coinRewardRate / 100 * coinPrice / 1000
+								tmpMyRecommendAmountCoin := tmpMyRecommendAmount * coinRewardRate / 100 * 1000 / coinPrice
 
 								tmpStatus := tmpMyTopUserRecommendUserLocationLast.Status // 现在还在运行中
 
@@ -1750,7 +1750,7 @@ func (uuc *UserUseCase) AdminDailyLocationReward(ctx context.Context, req *v1.Ad
 
 										tmpLastReward := tmpMyRecommendAmount - (tmpMyTopUserRecommendUserLocationLast.Current - tmpMyTopUserRecommendUserLocationLast.CurrentMax)
 										tmpMyRecommendAmountUsdt = tmpLastReward * rewardRate / 100 // 记录下一次
-										tmpMyRecommendAmountCoin = tmpLastReward * coinRewardRate / 100 * coinPrice / 1000
+										tmpMyRecommendAmountCoin = tmpLastReward * coinRewardRate / 100 * 1000 / coinPrice
 									}
 								}
 
@@ -1785,7 +1785,7 @@ func (uuc *UserUseCase) AdminDailyLocationReward(ctx context.Context, req *v1.Ad
 			tmpCurrentStatus := vUserLocations.Status // 现在还在运行中
 
 			tmpUsdtAmount := tmpCurrentReward * rewardRate / 100 // 记录下一次
-			tmpBalanceCoinAmount := tmpCurrentReward * coinRewardRate / 100 * coinPrice / 1000
+			tmpBalanceCoinAmount := tmpCurrentReward * coinRewardRate / 100 * 1000 / coinPrice
 
 			vUserLocations.Status = "running"
 			vUserLocations.Current += tmpCurrentReward
@@ -1795,7 +1795,7 @@ func (uuc *UserUseCase) AdminDailyLocationReward(ctx context.Context, req *v1.Ad
 
 					lastRewardAmount := tmpCurrentReward - (vUserLocations.Current - vUserLocations.CurrentMax)
 					tmpUsdtAmount = lastRewardAmount * rewardRate / 100 // 记录下一次
-					tmpBalanceCoinAmount = lastRewardAmount * coinRewardRate / 100 * coinPrice / 1000
+					tmpBalanceCoinAmount = lastRewardAmount * coinRewardRate / 100 * 1000 / coinPrice
 				}
 				vUserLocations.Status = "stop"
 			}
@@ -1998,7 +1998,7 @@ func (uuc *UserUseCase) AdminDailyRecommendReward(ctx context.Context, req *v1.A
 				}
 
 				feeLevel1Usdt := feeLevel1 * rewardRate / 100
-				feeLevel1Coin := feeLevel1 * coinRewardRate / 100 * coinPrice / 1000
+				feeLevel1Coin := feeLevel1 * coinRewardRate / 100 * 1000 / coinPrice
 
 				tmpCurrentStatus := myLocationLast.Status // 现在还在运行中
 				myLocationLast.Status = "running"
@@ -2009,7 +2009,7 @@ func (uuc *UserUseCase) AdminDailyRecommendReward(ctx context.Context, req *v1.A
 
 						tmpLastAmount := feeLevel1 - (myLocationLast.Current - myLocationLast.CurrentMax)
 						feeLevel1Usdt = tmpLastAmount * rewardRate / 100
-						feeLevel1Coin = tmpLastAmount * coinRewardRate / 100 * coinPrice / 1000
+						feeLevel1Coin = tmpLastAmount * coinRewardRate / 100 * 1000 / coinPrice
 					}
 					myLocationLast.Status = "stop"
 				}
@@ -2048,7 +2048,7 @@ func (uuc *UserUseCase) AdminDailyRecommendReward(ctx context.Context, req *v1.A
 				}
 
 				feeLevel2Usdt := feeLevel2 * rewardRate / 100
-				feeLevel2Coin := feeLevel2 * coinRewardRate / 100 * coinPrice / 1000
+				feeLevel2Coin := feeLevel2 * coinRewardRate / 100 * 1000 / coinPrice
 
 				tmpCurrentStatus := myLocationLast.Status // 现在还在运行中
 				myLocationLast.Status = "running"
@@ -2059,7 +2059,7 @@ func (uuc *UserUseCase) AdminDailyRecommendReward(ctx context.Context, req *v1.A
 
 						tmpLastAmount := feeLevel2 - (myLocationLast.Current - myLocationLast.CurrentMax)
 						feeLevel2Usdt = tmpLastAmount * rewardRate / 100
-						feeLevel2Coin = tmpLastAmount * coinRewardRate / 100 * coinPrice / 1000
+						feeLevel2Coin = tmpLastAmount * coinRewardRate / 100 * 1000 / coinPrice
 					}
 					myLocationLast.Status = "stop"
 				}
@@ -2098,7 +2098,7 @@ func (uuc *UserUseCase) AdminDailyRecommendReward(ctx context.Context, req *v1.A
 				}
 
 				feeLevel3Usdt := feeLevel3 * rewardRate / 100
-				feeLevel3Coin := feeLevel3 * coinRewardRate / 100 * coinPrice / 1000
+				feeLevel3Coin := feeLevel3 * coinRewardRate / 100 * 1000 / coinPrice
 
 				tmpCurrentStatus := myLocationLast.Status // 现在还在运行中
 				myLocationLast.Status = "running"
@@ -2109,7 +2109,7 @@ func (uuc *UserUseCase) AdminDailyRecommendReward(ctx context.Context, req *v1.A
 
 						tmpLastAmount := feeLevel3 - (myLocationLast.Current - myLocationLast.CurrentMax)
 						feeLevel3Usdt = tmpLastAmount * rewardRate / 100
-						feeLevel3Coin = tmpLastAmount * coinRewardRate / 100 * coinPrice / 1000
+						feeLevel3Coin = tmpLastAmount * coinRewardRate / 100 * 1000 / coinPrice
 					}
 					myLocationLast.Status = "stop"
 				}
@@ -2148,7 +2148,7 @@ func (uuc *UserUseCase) AdminDailyRecommendReward(ctx context.Context, req *v1.A
 				}
 
 				feeLevel4Usdt := feeLevel4 * rewardRate / 100
-				feeLevel4Coin := feeLevel4 * coinRewardRate / 100 * coinPrice / 1000
+				feeLevel4Coin := feeLevel4 * coinRewardRate / 100 * 1000 / coinPrice
 
 				tmpCurrentStatus := myLocationLast.Status // 现在还在运行中
 				myLocationLast.Status = "running"
@@ -2159,7 +2159,7 @@ func (uuc *UserUseCase) AdminDailyRecommendReward(ctx context.Context, req *v1.A
 
 						tmpLastAmount := feeLevel4 - (myLocationLast.Current - myLocationLast.CurrentMax)
 						feeLevel4Usdt = tmpLastAmount * rewardRate / 100
-						feeLevel4Coin = tmpLastAmount * coinRewardRate / 100 * coinPrice / 1000
+						feeLevel4Coin = tmpLastAmount * coinRewardRate / 100 * 1000 / coinPrice
 
 					}
 					myLocationLast.Status = "stop"

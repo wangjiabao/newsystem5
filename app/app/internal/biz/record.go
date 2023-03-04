@@ -302,7 +302,7 @@ func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord
 						tmpRewardAmount := currentValue * recommendNeed / 100
 
 						tmpBalanceAmount := tmpRewardAmount * rewardRate / 100 // 记录下一次
-						tmpBalanceCoinAmount := tmpRewardAmount * coinRewardRate / 100 * coinPrice / 1000
+						tmpBalanceCoinAmount := tmpRewardAmount * coinRewardRate / 100 * 1000 / coinPrice
 
 						myUserRecommendUserLocationLast.Status = "running"
 						myUserRecommendUserLocationLast.Current += tmpRewardAmount
@@ -314,7 +314,7 @@ func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord
 								// 这里刚刚停止
 								tmpLastAmount := tmpRewardAmount - (myUserRecommendUserLocationLast.Current - myUserRecommendUserLocationLast.CurrentMax)
 								tmpBalanceAmount = tmpLastAmount * rewardRate / 100 // 记录下一次
-								tmpBalanceCoinAmount = tmpLastAmount * coinRewardRate / 100 * coinPrice / 1000
+								tmpBalanceCoinAmount = tmpLastAmount * coinRewardRate / 100 * 1000 / coinPrice
 							}
 						}
 
@@ -371,7 +371,7 @@ func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord
 					}
 
 					stopUsdt += tmpCurrentAmount * rewardRate / 100 // 记录下一次
-					stopCoin += tmpCurrentAmount * coinRewardRate / 100 * coinPrice / 1000
+					stopCoin += tmpCurrentAmount * coinRewardRate / 100 * 1000 / coinPrice
 
 					_, err = ruc.userBalanceRepo.DepositLastNew(ctx, v.UserId, tmpCurrentAmount, stopUsdt, stopCoin) // 充值
 					if nil != err {
@@ -557,7 +557,7 @@ func (ruc *RecordUseCase) AdminLocationInsert(ctx context.Context, userId int64,
 				}
 
 				stopUsdt += tmpCurrentAmount * rewardRate / 100 // 记录下一次
-				stopCoin += tmpCurrentAmount * coinRewardRate / 100 * coinPrice / 1000
+				stopCoin += tmpCurrentAmount * coinRewardRate / 100 * 1000 / coinPrice
 
 				_, err = ruc.userBalanceRepo.DepositLastNew(ctx, userId, tmpCurrentAmount, stopUsdt, stopCoin) // 充值
 				if nil != err {
