@@ -576,11 +576,11 @@ func (u *UserRepo) GetUsers(ctx context.Context, b *biz.Pagination, address stri
 	}
 
 	if isLocation {
-		instance = instance.Joins("inner join location on user.id = location.user_id").Group("user.id")
+		instance = instance.Joins("inner join location_new on user.id = location.user_id").Group("user.id")
 	}
 
 	if 0 < vip {
-		instance = instance.Joins("inner join user_info on user.id = user_info.user_id and user_info.vip=?", vip).Group("user.id")
+		instance = instance.Joins("inner join user_area on user.id = user_area.user_id and user_area.level=?", vip)
 	}
 
 	instance = instance.Count(&count)

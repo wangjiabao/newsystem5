@@ -30,6 +30,7 @@ type AppClient interface {
 	RecommendList(ctx context.Context, in *RecommendListRequest, opts ...grpc.CallOption) (*RecommendListReply, error)
 	Withdraw(ctx context.Context, in *WithdrawRequest, opts ...grpc.CallOption) (*WithdrawReply, error)
 	Deposit(ctx context.Context, in *DepositRequest, opts ...grpc.CallOption) (*DepositReply, error)
+	Deposit2(ctx context.Context, in *DepositRequest, opts ...grpc.CallOption) (*DepositReply, error)
 	AdminRewardList(ctx context.Context, in *AdminRewardListRequest, opts ...grpc.CallOption) (*AdminRewardListReply, error)
 	LockSystem(ctx context.Context, in *LockSystemRequest, opts ...grpc.CallOption) (*LockSystemReply, error)
 	AdminUserList(ctx context.Context, in *AdminUserListRequest, opts ...grpc.CallOption) (*AdminUserListReply, error)
@@ -142,6 +143,15 @@ func (c *appClient) Withdraw(ctx context.Context, in *WithdrawRequest, opts ...g
 func (c *appClient) Deposit(ctx context.Context, in *DepositRequest, opts ...grpc.CallOption) (*DepositReply, error) {
 	out := new(DepositReply)
 	err := c.cc.Invoke(ctx, "/api.App/Deposit", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appClient) Deposit2(ctx context.Context, in *DepositRequest, opts ...grpc.CallOption) (*DepositReply, error) {
+	out := new(DepositReply)
+	err := c.cc.Invoke(ctx, "/api.App/Deposit2", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -484,6 +494,7 @@ type AppServer interface {
 	RecommendList(context.Context, *RecommendListRequest) (*RecommendListReply, error)
 	Withdraw(context.Context, *WithdrawRequest) (*WithdrawReply, error)
 	Deposit(context.Context, *DepositRequest) (*DepositReply, error)
+	Deposit2(context.Context, *DepositRequest) (*DepositReply, error)
 	AdminRewardList(context.Context, *AdminRewardListRequest) (*AdminRewardListReply, error)
 	LockSystem(context.Context, *LockSystemRequest) (*LockSystemReply, error)
 	AdminUserList(context.Context, *AdminUserListRequest) (*AdminUserListReply, error)
@@ -550,6 +561,9 @@ func (UnimplementedAppServer) Withdraw(context.Context, *WithdrawRequest) (*With
 }
 func (UnimplementedAppServer) Deposit(context.Context, *DepositRequest) (*DepositReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Deposit not implemented")
+}
+func (UnimplementedAppServer) Deposit2(context.Context, *DepositRequest) (*DepositReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Deposit2 not implemented")
 }
 func (UnimplementedAppServer) AdminRewardList(context.Context, *AdminRewardListRequest) (*AdminRewardListReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AdminRewardList not implemented")
@@ -812,6 +826,24 @@ func _App_Deposit_Handler(srv interface{}, ctx context.Context, dec func(interfa
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AppServer).Deposit(ctx, req.(*DepositRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _App_Deposit2_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DepositRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppServer).Deposit2(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.App/Deposit2",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppServer).Deposit2(ctx, req.(*DepositRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1502,6 +1534,10 @@ var App_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Deposit",
 			Handler:    _App_Deposit_Handler,
+		},
+		{
+			MethodName: "Deposit2",
+			Handler:    _App_Deposit2_Handler,
 		},
 		{
 			MethodName: "AdminRewardList",

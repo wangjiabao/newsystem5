@@ -103,6 +103,8 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 		globalLock *biz.GlobalLock
 	)
 
+	end := time.Now().UTC().Add(20 * time.Second)
+
 	// 配置
 	//configs, err = a.uuc.GetDhbConfig(ctx)
 	//if nil != configs {
@@ -138,6 +140,195 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 		if nil != err {
 			break
 		}
+
+		now := time.Now().UTC()
+		fmt.Println(now, end)
+		if end.Before(now) {
+			break
+		}
+		// 辅助查询
+		//depositDhbResult, err = requestEthDepositResult(200, int64(i), "0x96BD81715c69eE013405B4005Ba97eA1f420fd87")
+		//tmpDepositDhbResult, err = requestEthDepositResult(100, int64(i+1), "0x96BD81715c69eE013405B4005Ba97eA1f420fd87")
+		//for kTmpDepositDhbResult, v := range tmpDepositDhbResult {
+		//	if _, ok := tmpDepositDhbResult[kTmpDepositDhbResult]; !ok {
+		//		depositDhbResult[kTmpDepositDhbResult] = v
+		//	}
+		//}
+		if 0 >= len(depositUsdtResult) {
+			break
+		}
+
+		for hashKey, vDepositResult := range depositUsdtResult { // 主查询
+			hashKeys = append(hashKeys, hashKey)
+			fromAccount = append(fromAccount, vDepositResult.From)
+		}
+		//userDepositDhbResult = make(map[string]map[string]*eth, 0) // 辅助数据
+		//for k, v := range depositDhbResult {
+		//	hashKeys = append(hashKeys, k)
+		//	fromAccount = append(fromAccount, v.From)
+		//	if _, ok := userDepositDhbResult[v.From]; !ok {
+		//		userDepositDhbResult[v.From] = make(map[string]*eth, 0)
+		//	}
+		//	userDepositDhbResult[v.From][k] = v
+		//}
+
+		depositUsers, err = a.uuc.GetUserByAddress(ctx, fromAccount...)
+		if nil != depositUsers {
+			existEthUserRecords, err = a.ruc.GetEthUserRecordByTxHash(ctx, hashKeys...)
+			// 统计开始
+			notExistDepositResult = make([]*biz.EthUserRecord, 0)
+			for _, vDepositUsdtResult := range depositUsdtResult { // 主查usdt
+				if _, ok := existEthUserRecords[vDepositUsdtResult.Hash]; ok { // 记录已存在
+					continue
+				}
+				if _, ok := depositUsers[vDepositUsdtResult.From]; !ok { // 用户不存在
+					continue
+				}
+				//if _, ok := userDepositDhbResult[vDepositUsdtResult.From]; !ok { // 没有dhb的充值记录
+				//	continue
+				//}
+				//var (
+				//	tmpDhbHash, tmpDhbHashValue string
+				//)
+
+				//tmpPass := false
+				//for _, vUserDepositDhbResult := range userDepositDhbResult[vDepositUsdtResult.From] { // 充值数额类型匹配
+				//	if _, ok := existEthUserRecords[vUserDepositDhbResult.Hash]; ok { // 记录已存在
+				//		continue
+				//	}
+				//
+				//	if "10000000000000000" == vDepositUsdtResult.Value {
+				//		tmpPass = true
+				//	} else if "30000000000000000" == vDepositUsdtResult.Value {
+				//		tmpPass = true
+				//	} else if "50000000000000000" == vDepositUsdtResult.Value {
+				//		tmpPass = true
+				//	} else {
+				//		continue
+				//	}
+				//
+				//	tmpDhbHash = vUserDepositDhbResult.Hash
+				//	tmpDhbHashValue = vUserDepositDhbResult.Value
+				//}
+				//if !tmpPass {
+				//	continue
+				//}
+
+				// 最少百位以上
+				lenValue := len(vDepositUsdtResult.Value)
+				if 18 > lenValue { // 0.1
+					continue
+				}
+				// 去掉8个尾数0作为系统金额
+				tmpValue, _ := strconv.ParseInt(vDepositUsdtResult.Value[0:lenValue-8], 10, 64)
+				if 0 == tmpValue {
+					continue
+				}
+				//fmt.Println(vDepositUsdtResult.Value, tmpValue)
+				tmpValue = tmpValue * 10 // 4个地址分，精度目前只识别到这里，如果有人
+				//fmt.Println(tmpValue)
+				if int64(10000000000) > tmpValue { // 目前0.1表示
+					continue
+				}
+
+				notExistDepositResult = append(notExistDepositResult, &biz.EthUserRecord{ // 两种币的记录
+					UserId:    depositUsers[vDepositUsdtResult.From].ID,
+					Hash:      vDepositUsdtResult.Hash,
+					Status:    "success",
+					Type:      "deposit",
+					Amount:    strconv.FormatInt(tmpValue, 10) + "00000000",
+					RelAmount: tmpValue * 100, // todo 改目前放大100倍率
+					CoinType:  "USDT",
+				})
+
+				//&biz.EthUserRecord{
+				//	UserId:   depositUsers[vDepositUsdtResult.From].ID,
+				//	Hash:     tmpDhbHash,
+				//	Status:   "success",
+				//	Type:     "deposit",
+				//	Amount:   tmpDhbHashValue,
+				//	CoinType: "DHB",
+				//}
+			}
+
+			_, err = a.ruc.EthUserRecordHandle(ctx, notExistDepositResult...)
+			if nil != err {
+				fmt.Println(err)
+			}
+
+		}
+
+		//time.Sleep(2 * time.Second)
+	}
+
+	//_, _ = a.ruc.UnLockEthUserRecordHandle(ctx)
+	return &v1.DepositReply{}, nil
+}
+
+// Deposit2 deposit2.
+func (a *AppService) Deposit2(ctx context.Context, req *v1.DepositRequest) (*v1.DepositReply, error) {
+	time.Sleep(30 * time.Second)
+	end := time.Now().UTC().Add(20 * time.Second)
+	var (
+		depositUsdtResult map[string]*eth
+		//depositDhbResult      map[string]*eth
+		//tmpDepositDhbResult   map[string]*eth
+		//userDepositDhbResult  map[string]map[string]*eth
+		notExistDepositResult []*biz.EthUserRecord
+		existEthUserRecords   map[string]*biz.EthUserRecord
+		depositUsers          map[string]*biz.User
+		fromAccount           []string
+		hashKeys              []string
+		//lock                  bool
+		err error
+		//configs               []*biz.Config
+		//level1Dhb             string
+		//level2Dhb             string
+		//level3Dhb             string
+		globalLock *biz.GlobalLock
+	)
+
+	// 配置
+	//configs, err = a.uuc.GetDhbConfig(ctx)
+	//if nil != configs {
+	//	for _, vConfig := range configs {
+	//		if "level1Dhb" == vConfig.KeyName {
+	//			level1Dhb = vConfig.Value + "0000000000000000"
+	//		} else if "level2Dhb" == vConfig.KeyName {
+	//			level2Dhb = vConfig.Value + "0000000000000000"
+	//		} else if "level3Dhb" == vConfig.KeyName {
+	//			level3Dhb = vConfig.Value + "0000000000000000"
+	//		}
+	//	}
+	//}
+
+	//if lock, _ = a.ruc.LockEthUserRecordHandle(ctx); !lock { // 上全局锁简单，防止资源更新抢占
+	//	return &v1.DepositReply{}, nil
+	//}
+
+	//depositUsdtResult = make(map[string]*eth, 0)
+	// 每次一共最多查2000条，所以注意好外层调用的定时查询的时间设置，当然都可以重新定义，
+	// 在功能上调用者查询两种币的交易记录，每次都要把数据覆盖查询，是一个较大范围的查找防止遗漏数据，范围最起码要大于实际这段时间的入单量，不能边界查询容易掉单，这样的实现是因为简单
+	for i := 1; i <= 10; i++ {
+
+		// 获取系统锁
+		globalLock, err = a.ruc.GetGlobalLock(ctx)
+		if 1 != globalLock.Status {
+			break
+		}
+
+		//depositUsdtResult, err = requestEthDepositResult(200, int64(i), "0x55d398326f99059fF775485246999027B3197955")
+		depositUsdtResult, err = requestEthDepositResult(200, int64(i), "0x55d398326f99059fF775485246999027B3197955")
+		if nil != err {
+			break
+		}
+
+		now := time.Now().UTC()
+		fmt.Println(now, end)
+		if end.Before(now) {
+			break
+		}
+
 		// 辅助查询
 		//depositDhbResult, err = requestEthDepositResult(200, int64(i), "0x96BD81715c69eE013405B4005Ba97eA1f420fd87")
 		//tmpDepositDhbResult, err = requestEthDepositResult(100, int64(i+1), "0x96BD81715c69eE013405B4005Ba97eA1f420fd87")
