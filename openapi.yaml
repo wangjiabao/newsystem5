@@ -1047,6 +1047,8 @@ components:
                     format: int64
                 allBalance:
                     type: string
+                allBalanceBtc:
+                    type: string
                 todayLocation:
                     type: string
                 allLocation:
@@ -1055,9 +1057,17 @@ components:
                     type: string
                 allWithdraw:
                     type: string
+                allWithdrawBtc:
+                    type: string
+                todayWithdrawBtc:
+                    type: string
                 allReward:
                     type: string
                 allSystemRewardAndFee:
+                    type: string
+                balanceReward:
+                    type: string
+                balanceRewardRewarded:
                     type: string
         AdminAreaLevelUpdateReply:
             type: object

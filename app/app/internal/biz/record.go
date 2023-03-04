@@ -135,16 +135,20 @@ func (ruc *RecordUseCase) GetGlobalLock(ctx context.Context) (*GlobalLock, error
 func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord ...*EthUserRecord) (bool, error) {
 
 	var (
-		configs        []*Config
-		recommendNeed  int64
-		timeAgain      int64
-		outRate        int64
-		rewardRate     int64
-		coinPrice      int64
-		coinRewardRate int64
+		configs            []*Config
+		recommendNeed      int64
+		timeAgain          int64
+		outRate            int64
+		rewardRate         int64
+		coinPrice          int64
+		coinRewardRate     int64
+		recommendAreaOne   int64
+		recommendAreaTwo   int64
+		recommendAreaThree int64
+		recommendAreaFour  int64
 	)
 	// 配置
-	configs, _ = ruc.configRepo.GetConfigByKeys(ctx, "recommend_need", "time_again", "out_rate", "coin_price", "reward_rate", "coin_reward_rate")
+	configs, _ = ruc.configRepo.GetConfigByKeys(ctx, "recommend_need", "time_again", "out_rate", "coin_price", "reward_rate", "coin_reward_rate", "recommend_area_one", "recommend_area_two", "recommend_area_three", "recommend_area_four")
 	if nil != configs {
 		for _, vConfig := range configs {
 			if "recommend_need" == vConfig.KeyName {
@@ -159,6 +163,14 @@ func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord
 				coinRewardRate, _ = strconv.ParseInt(vConfig.Value, 10, 64)
 			} else if "reward_rate" == vConfig.KeyName {
 				rewardRate, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "recommend_area_one" == vConfig.KeyName {
+				recommendAreaOne, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "recommend_area_two" == vConfig.KeyName {
+				recommendAreaTwo, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "recommend_area_three" == vConfig.KeyName {
+				recommendAreaThree, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "recommend_area_four" == vConfig.KeyName {
+				recommendAreaFour, _ = strconv.ParseInt(vConfig.Value, 10, 64)
 			}
 		}
 	}
@@ -346,6 +358,78 @@ func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord
 					_, err = ruc.userRecommendRepo.UpdateUserAreaAmount(ctx, vTmpRecommendUserId, currentValue/100000)
 					if nil != err {
 						return err
+					}
+				}
+			}
+
+			// 更新级别
+			for _, vTmpRecommendUserIds := range tmpRecommendUserIds {
+				vTmpRecommendUserId, _ := strconv.ParseInt(vTmpRecommendUserIds, 10, 64)
+				if vTmpRecommendUserId > 0 {
+					// 查大小区
+					var tmpUserRecommend *UserRecommend
+					tmpUserRecommend, err = ruc.userRecommendRepo.GetUserRecommendByUserId(ctx, vTmpRecommendUserId)
+					if nil != err {
+						continue
+					}
+
+					// 伞下业绩
+					var (
+						myRecommendUsers   []*UserRecommend
+						userAreas          []*UserArea
+						maxAreaAmount      int64
+						areaAmount         int64
+						level              int64
+						myRecommendUserIds []int64
+					)
+					myCode := tmpUserRecommend.RecommendCode + "D" + strconv.FormatInt(vTmpRecommendUserId, 10)
+					myRecommendUsers, err = ruc.userRecommendRepo.GetUserRecommendByCode(ctx, myCode)
+					if nil == err {
+						// 找直推
+						for _, vMyRecommendUsers := range myRecommendUsers {
+							myRecommendUserIds = append(myRecommendUserIds, vMyRecommendUsers.UserId)
+						}
+					}
+					if 0 < len(myRecommendUserIds) {
+						userAreas, err = ruc.userRecommendRepo.GetUserAreas(ctx, myRecommendUserIds)
+						if nil == err {
+							var (
+								tmpTotalAreaAmount int64
+							)
+							for _, vUserAreas := range userAreas {
+								tmpAreaAmount := vUserAreas.Amount + vUserAreas.SelfAmount
+								tmpTotalAreaAmount += tmpAreaAmount
+								if tmpAreaAmount > maxAreaAmount {
+									maxAreaAmount = tmpAreaAmount
+								}
+							}
+
+							areaAmount = tmpTotalAreaAmount - maxAreaAmount
+						}
+					}
+
+					// 比较级别
+					if areaAmount >= recommendAreaOne*100000 {
+						level = 1
+					}
+
+					if areaAmount >= recommendAreaTwo*100000 {
+						level = 2
+					}
+
+					if areaAmount >= recommendAreaThree*100000 {
+						level = 3
+					}
+
+					if areaAmount >= recommendAreaFour*100000 {
+						level = 4
+					}
+
+					if level > 0 {
+						_, err = ruc.userRecommendRepo.UpdateUserAreaLevelUp(ctx, vTmpRecommendUserId, level)
+						if nil != err {
+							return err
+						}
 					}
 				}
 			}

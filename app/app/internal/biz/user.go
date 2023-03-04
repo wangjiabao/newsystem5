@@ -222,6 +222,7 @@ type UserRecommendRepo interface {
 	UpdateUserAreaAmount(ctx context.Context, userId int64, amount int64) (bool, error)
 	UpdateUserAreaSelfAmount(ctx context.Context, userId int64, amount int64) (bool, error)
 	UpdateUserAreaLevel(ctx context.Context, userId int64, level int64) (bool, error)
+	UpdateUserAreaLevelUp(ctx context.Context, userId int64, level int64) (bool, error)
 	GetUserAreas(ctx context.Context, userIds []int64) ([]*UserArea, error)
 	GetUserArea(ctx context.Context, userId int64) (*UserArea, error)
 	CreateUserArea(ctx context.Context, u *User) (bool, error)
@@ -436,6 +437,19 @@ func (uuc *UserUseCase) AdminUserList(ctx context.Context, req *v1.AdminUserList
 		return res, nil
 	}
 
+	var (
+		myUserAreas []*UserArea
+	)
+
+	myUserAreasMap := make(map[int64]*UserArea, 0)
+	myUserAreas, err = uuc.urRepo.GetUserAreas(ctx, userIds)
+	if nil != err {
+		return res, nil
+	}
+	for _, vMyUserAreas := range myUserAreas {
+		myUserAreasMap[vMyUserAreas.UserId] = vMyUserAreas
+	}
+
 	userCurrentMonthRecommendCount, err = uuc.userCurrentMonthRecommendRepo.GetUserCurrentMonthRecommendCountByUserIds(ctx, userIds...)
 
 	for _, v := range users {
@@ -485,6 +499,9 @@ func (uuc *UserUseCase) AdminUserList(ctx context.Context, req *v1.AdminUserList
 		if _, ok := userInfos[v.ID]; !ok {
 			continue
 		}
+		if _, ok := myUserAreasMap[v.ID]; !ok {
+			continue
+		}
 
 		var tmpCount int64
 		if nil != userCurrentMonthRecommendCount {
@@ -499,7 +516,7 @@ func (uuc *UserUseCase) AdminUserList(ctx context.Context, req *v1.AdminUserList
 			Address:          v.Address,
 			BalanceUsdt:      fmt.Sprintf("%.2f", float64(userBalances[v.ID].BalanceUsdt)/float64(10000000000)),
 			BalanceDhb:       fmt.Sprintf("%.2f", float64(userBalances[v.ID].BalanceDhb)/float64(10000000000)),
-			Vip:              userInfos[v.ID].Vip,
+			Vip:              myUserAreasMap[v.ID].Level,
 			MonthRecommend:   tmpCount,
 			AreaAmount:       fmt.Sprintf("%.2f", float64(areaAmount)/float64(100000)),
 			AreaMaxAmount:    fmt.Sprintf("%.2f", float64(maxAreaAmount)/float64(100000)),

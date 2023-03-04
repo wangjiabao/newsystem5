@@ -948,6 +948,20 @@ func (ur *UserRecommendRepo) UpdateUserAreaLevel(ctx context.Context, userId int
 	return true, nil
 }
 
+// UpdateUserAreaLevelUp .
+func (ur *UserRecommendRepo) UpdateUserAreaLevelUp(ctx context.Context, userId int64, level int64) (bool, error) {
+	// 业务上限制了错误的上一级未insert下一级优先insert的情况
+	var err error
+	if err = ur.data.DB(ctx).Table("user_area").
+		Where("user_id=?", userId).
+		Where("level<?", level).
+		Updates(map[string]interface{}{"level": level}).Error; nil != err {
+		return false, errors.NotFound("user balance err", "user area not found")
+	}
+
+	return true, nil
+}
+
 // UndoUser .
 func (u *UserRepo) UndoUser(ctx context.Context, userId int64, undo int64) (bool, error) {
 	res := u.data.DB(ctx).Table("user").Where("id=?", userId).Updates(map[string]interface{}{"undo": undo})

@@ -601,12 +601,17 @@ message AdminAllReply {
 	int64 locationCount = 10;
 	int64 totalUser = 2;
 	string allBalance = 3;
+	string allBalanceBtc = 13;
 	string todayLocation = 4;
 	string allLocation = 5;
 	string todayWithdraw = 6;
 	string allWithdraw = 7;
+	string allWithdrawBtc = 12;
+	string todayWithdrawBtc = 11;
 	string allReward = 8;
 	string allSystemRewardAndFee = 9;
+	string balanceReward = 14;
+	string balanceRewardRewarded = 15;
 }
 
 message AdminUserRecommendRequest {

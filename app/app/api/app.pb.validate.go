@@ -5172,6 +5172,8 @@ func (m *AdminAllReply) validate(all bool) error {
 
 	// no validation rules for AllBalance
 
+	// no validation rules for AllBalanceBtc
+
 	// no validation rules for TodayLocation
 
 	// no validation rules for AllLocation
@@ -5180,9 +5182,17 @@ func (m *AdminAllReply) validate(all bool) error {
 
 	// no validation rules for AllWithdraw
 
+	// no validation rules for AllWithdrawBtc
+
+	// no validation rules for TodayWithdrawBtc
+
 	// no validation rules for AllReward
 
 	// no validation rules for AllSystemRewardAndFee
+
+	// no validation rules for BalanceReward
+
+	// no validation rules for BalanceRewardRewarded
 
 	if len(errors) > 0 {
 		return AdminAllReplyMultiError(errors)
