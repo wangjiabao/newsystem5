@@ -1558,7 +1558,7 @@ func (ub *UserBalanceRepo) GetWithdrawById(ctx context.Context, id int64) (*biz.
 }
 
 // GetWithdraws .
-func (ub *UserBalanceRepo) GetWithdraws(ctx context.Context, b *biz.Pagination, userId int64) ([]*biz.Withdraw, error, int64) {
+func (ub *UserBalanceRepo) GetWithdraws(ctx context.Context, b *biz.Pagination, userId int64, withdrawType string) ([]*biz.Withdraw, error, int64) {
 	var (
 		withdraws []*Withdraw
 		count     int64
@@ -1569,6 +1569,10 @@ func (ub *UserBalanceRepo) GetWithdraws(ctx context.Context, b *biz.Pagination, 
 
 	if 0 < userId {
 		instance = instance.Where("user_id=?", userId)
+	}
+
+	if "" != withdrawType {
+		instance = instance.Where("type=?", withdrawType)
 	}
 
 	instance = instance.Count(&count)

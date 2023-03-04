@@ -186,7 +186,7 @@ type UserBalanceRepo interface {
 	WithdrawUsdt(ctx context.Context, userId int64, amount int64) error
 	WithdrawDhb(ctx context.Context, userId int64, amount int64) error
 	GetWithdrawByUserId(ctx context.Context, userId int64) ([]*Withdraw, error)
-	GetWithdraws(ctx context.Context, b *Pagination, userId int64) ([]*Withdraw, error, int64)
+	GetWithdraws(ctx context.Context, b *Pagination, userId int64, withdrawType string) ([]*Withdraw, error, int64)
 	GetWithdrawPassOrRewarded(ctx context.Context) ([]*Withdraw, error)
 	GetWithdrawPassOrRewardedFirst(ctx context.Context) (*Withdraw, error)
 	UpdateWithdraw(ctx context.Context, id int64, status string) (*Withdraw, error)
@@ -1306,7 +1306,7 @@ func (uuc *UserUseCase) AdminWithdrawList(ctx context.Context, req *v1.AdminWith
 	withdraws, err, count = uuc.ubRepo.GetWithdraws(ctx, &Pagination{
 		PageNum:  int(req.Page),
 		PageSize: 10,
-	}, userId)
+	}, userId, req.WithDrawType)
 	if nil != err {
 		return res, err
 	}

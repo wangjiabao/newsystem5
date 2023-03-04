@@ -3771,6 +3771,8 @@ func (m *AdminWithdrawListRequest) validate(all bool) error {
 
 	var errors []error
 
+	// no validation rules for WithDrawType
+
 	// no validation rules for Page
 
 	// no validation rules for Address

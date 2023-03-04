@@ -538,6 +538,7 @@ message AdminLocationAllListReply {
 }
 
 message AdminWithdrawListRequest {
+	string withDrawType = 3;
 	int64 page = 1;
 	string address = 2;
 }

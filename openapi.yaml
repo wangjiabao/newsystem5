@@ -834,6 +834,10 @@ paths:
                 - App
             operationId: App_AdminWithdrawList
             parameters:
+                - name: withDrawType
+                  in: query
+                  schema:
+                    type: string
                 - name: page
                   in: query
                   schema:
