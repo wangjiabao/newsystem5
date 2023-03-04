@@ -976,7 +976,7 @@ func (u *UserRepo) UndoUser(ctx context.Context, userId int64, undo int64) (bool
 func (ur *UserRecommendRepo) GetUserAreas(ctx context.Context, userIds []int64) ([]*biz.UserArea, error) {
 
 	var userAreas []*UserArea
-	if err := ur.data.db.Where("user_id in (?)", userIds).Table("user_area").Find(&userAreas).Error; err != nil {
+	if err := ur.data.DB(ctx).Where("user_id in (?)", userIds).Table("user_area").Find(&userAreas).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New(500, "USER AREA NOT FOUND", err.Error())
 		}
