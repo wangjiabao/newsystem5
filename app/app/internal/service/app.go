@@ -126,7 +126,7 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 	//depositUsdtResult = make(map[string]*eth, 0)
 	// 每次一共最多查2000条，所以注意好外层调用的定时查询的时间设置，当然都可以重新定义，
 	// 在功能上调用者查询两种币的交易记录，每次都要把数据覆盖查询，是一个较大范围的查找防止遗漏数据，范围最起码要大于实际这段时间的入单量，不能边界查询容易掉单，这样的实现是因为简单
-	for i := 1; i <= 10; i++ {
+	for i := 1; i <= 5; i++ {
 
 		// 获取系统锁
 		globalLock, err = a.ruc.GetGlobalLock(ctx)
@@ -215,7 +215,7 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 
 				// 最少百位以上
 				lenValue := len(vDepositUsdtResult.Value)
-				if 18 > lenValue { // 0.1
+				if 20 > lenValue { // 0.1
 					continue
 				}
 				// 去掉8个尾数0作为系统金额
@@ -224,9 +224,9 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 					continue
 				}
 				//fmt.Println(vDepositUsdtResult.Value, tmpValue)
-				tmpValue = tmpValue * 10 // 4个地址分，精度目前只识别到这里，如果有人
+				tmpValue = tmpValue * 10 // 地址分，精度目前只识别到这里，如果有人
 				//fmt.Println(tmpValue)
-				if int64(10000000000) > tmpValue { // 目前0.1表示
+				if int64(1000000000000) > tmpValue { // 目前0.1表示
 					continue
 				}
 
@@ -236,7 +236,7 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 					Status:    "success",
 					Type:      "deposit",
 					Amount:    strconv.FormatInt(tmpValue, 10) + "00000000",
-					RelAmount: tmpValue * 100, // todo 改目前放大100倍率
+					RelAmount: tmpValue,
 					CoinType:  "USDT",
 				})
 
@@ -308,7 +308,7 @@ func (a *AppService) Deposit2(ctx context.Context, req *v1.DepositRequest) (*v1.
 	//depositUsdtResult = make(map[string]*eth, 0)
 	// 每次一共最多查2000条，所以注意好外层调用的定时查询的时间设置，当然都可以重新定义，
 	// 在功能上调用者查询两种币的交易记录，每次都要把数据覆盖查询，是一个较大范围的查找防止遗漏数据，范围最起码要大于实际这段时间的入单量，不能边界查询容易掉单，这样的实现是因为简单
-	for i := 1; i <= 10; i++ {
+	for i := 1; i <= 5; i++ {
 
 		// 获取系统锁
 		globalLock, err = a.ruc.GetGlobalLock(ctx)
@@ -398,7 +398,7 @@ func (a *AppService) Deposit2(ctx context.Context, req *v1.DepositRequest) (*v1.
 
 				// 最少百位以上
 				lenValue := len(vDepositUsdtResult.Value)
-				if 18 > lenValue { // 0.1
+				if 20 > lenValue { // 0.1
 					continue
 				}
 				// 去掉8个尾数0作为系统金额
@@ -409,7 +409,7 @@ func (a *AppService) Deposit2(ctx context.Context, req *v1.DepositRequest) (*v1.
 				//fmt.Println(vDepositUsdtResult.Value, tmpValue)
 				tmpValue = tmpValue * 10 // 4个地址分，精度目前只识别到这里，如果有人
 				//fmt.Println(tmpValue)
-				if int64(10000000000) > tmpValue { // 目前0.1表示
+				if int64(1000000000000) > tmpValue { // 目前0.1表示
 					continue
 				}
 
@@ -419,7 +419,7 @@ func (a *AppService) Deposit2(ctx context.Context, req *v1.DepositRequest) (*v1.
 					Status:    "success",
 					Type:      "deposit",
 					Amount:    strconv.FormatInt(tmpValue, 10) + "00000000",
-					RelAmount: tmpValue * 100, // todo 改目前放大100倍率
+					RelAmount: tmpValue,
 					CoinType:  "USDT",
 				})
 
@@ -464,7 +464,7 @@ func requestEthDepositResult(offset int64, page int64, contractAddress string) (
 	data.Set("action", "tokentx")
 	data.Set("contractaddress", contractAddress)
 	data.Set("apikey", "CRCSHR2G3WXB1MET3BNA7ZQKQVSNXFYX18")
-	data.Set("address", "0x032b518716a92a9d44fe24393136b00712572aa8")
+	data.Set("address", "0x8aaccab66c923ae3a3ff96d23c6ac73aa365a858")
 	data.Set("sort", "desc")
 	data.Set("offset", strconv.FormatInt(offset, 10))
 	data.Set("page", strconv.FormatInt(page, 10))
@@ -508,7 +508,7 @@ func requestEthDepositResult(offset int64, page int64, contractAddress string) (
 
 	res := make(map[string]*eth, 0)
 	for _, v := range i.Result {
-		if "0x032b518716a92a9d44fe24393136b00712572aa8" == v.To { // 接收者
+		if "0x8aaccab66c923ae3a3ff96d23c6ac73aa365a858" == v.To { // 接收者
 			res[v.Hash] = v
 		}
 	}
@@ -813,7 +813,7 @@ func (a *AppService) AdminWithdrawEth(ctx context.Context, req *v1.AdminWithdraw
 			continue
 		}
 
-		withDrawAmount := strconv.FormatInt(withdraw.RelAmount, 10) + "000000" // 补八个0.系统基础1是10个0 todo 目前缩小100
+		withDrawAmount := strconv.FormatInt(withdraw.RelAmount, 10) + "00000000" // 补八个0.系统基础1是10个0
 
 		for i := 0; i < 3; i++ {
 			//fmt.Println(11111, user.ToAddress, v.Amount, balanceInt)
