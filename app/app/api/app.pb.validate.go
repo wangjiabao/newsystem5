@@ -5296,6 +5296,8 @@ func (m *AdminUserRecommendRequest) validate(all bool) error {
 
 	// no validation rules for UserId
 
+	// no validation rules for Address
+
 	if len(errors) > 0 {
 		return AdminUserRecommendRequestMultiError(errors)
 	}

@@ -616,6 +616,7 @@ message AdminAllReply {
 
 message AdminUserRecommendRequest {
 	int64 user_id = 1;
+	string address = 2;
 }
 
 message AdminUserRecommendReply {

@@ -710,6 +710,7 @@ func (uuc *UserUseCase) AdminRecommendList(ctx context.Context, req *v1.AdminUse
 		userIdsMap     map[int64]int64
 		userIds        []int64
 		users          map[int64]*User
+		user           *User
 		err            error
 	)
 
@@ -720,6 +721,21 @@ func (uuc *UserUseCase) AdminRecommendList(ctx context.Context, req *v1.AdminUse
 	// 地址查询
 	if 0 < req.UserId {
 		userRecommend, err = uuc.urRepo.GetUserRecommendByUserId(ctx, req.UserId)
+		if nil == userRecommend {
+			return res, nil
+		}
+
+		userRecommends, err = uuc.urRepo.GetUserRecommendByCode(ctx, userRecommend.RecommendCode+"D"+strconv.FormatInt(userRecommend.UserId, 10))
+		if nil != err {
+			return res, nil
+		}
+	} else if "" != req.Address {
+		user, err = uuc.repo.GetUserByAddress(ctx, req.Address)
+		if nil != err {
+			return res, nil
+		}
+
+		userRecommend, err = uuc.urRepo.GetUserRecommendByUserId(ctx, user.ID)
 		if nil == userRecommend {
 			return res, nil
 		}
