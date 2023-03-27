@@ -1550,6 +1550,33 @@ func (ub *UserBalanceRepo) GetWithdrawNotDeal(ctx context.Context) ([]*biz.Withd
 	return res, nil
 }
 
+// GetWithdrawByUserIds .
+func (ub *UserBalanceRepo) GetWithdrawByUserIds(ctx context.Context, userIds []int64) ([]*biz.Withdraw, error) {
+	var withdraws []*Withdraw
+	res := make([]*biz.Withdraw, 0)
+	if err := ub.data.db.Where("status=?", "success").Where("user_id in(?)", userIds).Table("withdraw").Find(&withdraws).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, errors.NotFound("WITHDRAW_NOT_FOUND", "withdraw not found")
+		}
+
+		return nil, errors.New(500, "WITHDRAW ERROR", err.Error())
+	}
+
+	for _, withdraw := range withdraws {
+		res = append(res, &biz.Withdraw{
+			ID:              withdraw.ID,
+			UserId:          withdraw.UserId,
+			Amount:          withdraw.Amount,
+			RelAmount:       withdraw.RelAmount,
+			BalanceRecordId: withdraw.BalanceRecordId,
+			Status:          withdraw.Status,
+			Type:            withdraw.Type,
+			CreatedAt:       withdraw.CreatedAt,
+		})
+	}
+	return res, nil
+}
+
 func (ub *UserBalanceRepo) GetWithdrawById(ctx context.Context, id int64) (*biz.Withdraw, error) {
 	var withdraw *Withdraw
 	if err := ub.data.db.Where("id=?", id).Table("withdraw").First(&withdraw).Error; err != nil {

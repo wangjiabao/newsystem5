@@ -1379,6 +1379,10 @@ components:
                     format: int64
                 createdAt:
                     type: string
+                amount:
+                    type: string
+                relAmount:
+                    type: string
         AdminVipUpdateReply:
             type: object
             properties: {}

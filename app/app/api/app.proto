@@ -626,6 +626,8 @@ message AdminUserRecommendReply {
 		string address = 3;
 		int64  id = 2;
 		string created_at = 1;
+		string amount = 5;
+		string rel_amount = 6;
 	}
 }
 

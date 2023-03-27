@@ -11834,6 +11834,10 @@ func (m *AdminUserRecommendReply_List) validate(all bool) error {
 
 	// no validation rules for CreatedAt
 
+	// no validation rules for Amount
+
+	// no validation rules for RelAmount
+
 	if len(errors) > 0 {
 		return AdminUserRecommendReply_ListMultiError(errors)
 	}
