@@ -790,11 +790,11 @@ func (uuc *UserUseCase) AdminRecommendList(ctx context.Context, req *v1.AdminUse
 			tmpRelAmount int64
 			tmpAmount    int64
 		)
-		if _, ok := useWithdrawMapRelAmount[v.UserId]; !ok {
+		if _, ok := useWithdrawMapRelAmount[v.UserId]; ok {
 			tmpRelAmount = useWithdrawMapRelAmount[v.UserId]
 		}
 
-		if _, ok := useWithdrawMapAmount[v.UserId]; !ok {
+		if _, ok := useWithdrawMapAmount[v.UserId]; ok {
 			tmpAmount = useWithdrawMapAmount[v.UserId]
 		}
 
