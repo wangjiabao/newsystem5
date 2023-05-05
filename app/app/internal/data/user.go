@@ -2764,6 +2764,24 @@ func (ub UserBalanceRepo) GetUserWithdrawDhbTotalToday(ctx context.Context) (int
 	return total.Total, nil
 }
 
+// GetUserWithdrawUsdtTotalByUserIds .
+func (ub UserBalanceRepo) GetUserWithdrawUsdtTotalByUserIds(ctx context.Context, userIds []int64) (int64, error) {
+	var total UserBalanceTotal
+	if err := ub.data.db.Table("user_balance_record").
+		Where("user_id in(?)", userIds).
+		Where("type=?", "withdraw").
+		Where("coin_type=?", "usdt").
+		Select("sum(amount) as total").Take(&total).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return total.Total, errors.NotFound("USER_BALANCE_RECORD_NOT_FOUND", "user balance not found")
+		}
+
+		return total.Total, errors.New(500, "USER BALANCE RECORD ERROR", err.Error())
+	}
+
+	return total.Total, nil
+}
+
 // GetUserWithdrawUsdtTotal .
 func (ub UserBalanceRepo) GetUserWithdrawUsdtTotal(ctx context.Context) (int64, error) {
 	var total UserBalanceTotal

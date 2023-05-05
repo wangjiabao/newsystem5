@@ -628,6 +628,7 @@ message AdminUserRecommendReply {
 		string created_at = 1;
 		string amount = 5;
 		string rel_amount = 6;
+		string recommend_all_amount = 7;
 	}
 }
 

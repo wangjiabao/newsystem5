@@ -1383,6 +1383,8 @@ components:
                     type: string
                 relAmount:
                     type: string
+                recommendAllAmount:
+                    type: string
         AdminVipUpdateReply:
             type: object
             properties: {}

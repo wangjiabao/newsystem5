@@ -200,6 +200,7 @@ type UserBalanceRepo interface {
 	GetUserWithdrawDhbTotalToday(ctx context.Context) (int64, error)
 	GetUserWithdrawUsdtTotal(ctx context.Context) (int64, error)
 	GetUserWithdrawDhbTotal(ctx context.Context) (int64, error)
+	GetUserWithdrawUsdtTotalByUserIds(ctx context.Context, userIds []int64) (int64, error)
 	GetUserRewardUsdtTotal(ctx context.Context) (int64, error)
 	GetUserRewardBalanceRewardTotal(ctx context.Context) (int64, error)
 	GetBalanceRewardTotal(ctx context.Context) (int64, error)
@@ -787,6 +788,24 @@ func (uuc *UserUseCase) AdminRecommendList(ctx context.Context, req *v1.AdminUse
 		}
 
 		var (
+			myAllRecommends           []*UserRecommend
+			tmpMyAllRecommendsUserIds []int64
+			totalWithdraw             int64
+		)
+
+		myCode := v.RecommendCode + "D" + strconv.FormatInt(v.UserId, 10)
+		myAllRecommends, err = uuc.urRepo.GetUserRecommendLikeCode(ctx, myCode)
+		if 0 < len(myAllRecommends) {
+			for _, vMyAllRecommends := range myAllRecommends {
+				tmpMyAllRecommendsUserIds = append(tmpMyAllRecommendsUserIds, vMyAllRecommends.UserId)
+			}
+
+			if 0 < len(tmpMyAllRecommendsUserIds) {
+				totalWithdraw, err = uuc.ubRepo.GetUserWithdrawUsdtTotalByUserIds(ctx, tmpMyAllRecommendsUserIds)
+			}
+		}
+
+		var (
 			tmpRelAmount int64
 			tmpAmount    int64
 		)
@@ -799,12 +818,13 @@ func (uuc *UserUseCase) AdminRecommendList(ctx context.Context, req *v1.AdminUse
 		}
 
 		res.Users = append(res.Users, &v1.AdminUserRecommendReply_List{
-			Address:   users[v.UserId].Address,
-			Id:        v.ID,
-			UserId:    v.UserId,
-			CreatedAt: v.CreatedAt.Add(8 * time.Hour).Format("2006-01-02 15:04:05"),
-			Amount:    fmt.Sprintf("%.2f", float64(tmpAmount)/float64(10000000000)),
-			RelAmount: fmt.Sprintf("%.2f", float64(tmpRelAmount)/float64(10000000000)),
+			Address:            users[v.UserId].Address,
+			Id:                 v.ID,
+			UserId:             v.UserId,
+			CreatedAt:          v.CreatedAt.Add(8 * time.Hour).Format("2006-01-02 15:04:05"),
+			Amount:             fmt.Sprintf("%.2f", float64(tmpAmount)/float64(10000000000)),
+			RelAmount:          fmt.Sprintf("%.2f", float64(tmpRelAmount)/float64(10000000000)),
+			RecommendAllAmount: fmt.Sprintf("%.2f", float64(totalWithdraw)/float64(10000000000)),
 		})
 	}
 
